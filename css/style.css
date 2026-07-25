@@ -174,7 +174,7 @@ nav.site-nav a.current {
   letter-spacing: 0.1em;
   margin-bottom: 6px;
 }
-.notice-card h3 { margin: 0 0 6px; font-size: 19px; }
+.notice-card > div > h3 { margin: 0 0 6px; font-size: 19px; color: #fff; }
 .notice-card p { margin: 0; color: var(--offwhite); font-size: 14px; }
 
 /* ---------- Section basics ---------- */
