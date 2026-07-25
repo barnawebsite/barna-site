@@ -41,11 +41,13 @@ Notes on why it's structured this way:
   for this specifically, it's a real focus area, not a subsection.
 
 ## Current page status
-- `index.html` — real homepage, built out properly.
-- `about.html`, `education-clinical.html`, `paediatric.html`, `members.html`,
-  `join.html` — placeholder stub pages only ("content being built next").
-  These are the next things to build, one at a time, with Mike's input on
-  what goes in each (he's copying source content from the old Weebly site).
+- `index.html`, `about.html`, `affiliations.html`, `education-clinical.html`,
+  `members.html` — real content, built out.
+- `paediatric.html` — still a placeholder stub. Biggest remaining content
+  gap; blocked on Mike sourcing content from the old Weebly site — don't
+  build until he provides it.
+- `join.html` was removed — Join is a modal (`data-ms-modal="signup"`)
+  triggered from the hero button and footer link, not a standalone page.
 - Two PDFs on the homepage still point to the *old* Weebly-hosted URLs
   (working, but temporary) — need migrating into `/files/` here before the
   old site is retired.
