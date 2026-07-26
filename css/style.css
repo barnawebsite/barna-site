@@ -229,15 +229,6 @@ section { padding: 56px 0; }
   padding: 48px 0;
 }
 .cta-band h2 { margin: 0 0 8px; }
-.already-member { margin: 0 0 32px; }
-.already-member p { font-size: 16px; color: var(--offwhite); margin: 0 0 14px; }
-.cta-divider {
-  border: none;
-  border-top: 1px solid rgba(255,255,255,0.2);
-  width: 100%;
-  max-width: 280px;
-  margin: 0 auto 32px;
-}
 .cta-price { font-size: 20px; font-weight: bold; color: var(--offwhite); margin: 0 0 24px; }
 
 /* ---------- Webinar archive cards (Members Area) ---------- */
@@ -335,6 +326,7 @@ section { padding: 56px 0; }
 }
 .page-header h1 { margin: 0 0 10px; font-size: clamp(26px, 3.4vw, 36px); }
 .page-header p.lead { color: var(--offwhite); max-width: 640px; margin: 0; font-size: 15px; }
+.header-login { margin: 20px 0 0; }
 
 .jump-nav {
   display: flex;
