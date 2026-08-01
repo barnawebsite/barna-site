@@ -1,7 +1,7 @@
 # BARNA website — project notes for Claude
 
 This is the new barna.co.uk site: plain static HTML/CSS (no build step, no
-framework), meant to be dragged straight into Netlify. It's replacing an
+framework), served straight from GitHub Pages. It's replacing an
 existing Weebly site. Mike (the person you're working with) is a nurse, not a
 developer, but is comfortable pasting/editing HTML directly.
 
