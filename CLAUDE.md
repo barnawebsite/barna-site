@@ -72,13 +72,35 @@ Notes on why it's structured this way:
   soon" note.
 
 ## Membership (Memberstack)
-- Memberstack gating is wired into every gated page via
-  `data-ms-content="members"` / `"!members"` blocks; script tag on all
-  pages. Tested working in Test Mode.
+- **Paid-only by design.** Two halves that must stay in sync — if you add
+  a gated page, do both or the gate leaks:
+  1. Gated blocks use `data-ms-content="paid-plans"` / `"!paid-plans"`.
+     Never `"members"` — that only means "logged in", so a free account
+     would see everything.
+  2. Every signup link carries
+     `data-ms-price:add="prc_annual-barna-membership-3y5t08ng"`, so there
+     is no route to an account that skips Stripe. This includes the
+     footer "Join BARNA" link, which is repeated on every page.
+- Memberstack script tag is on all pages. Signup is a modal
+  (`data-ms-modal="signup"`), never a standalone page.
+- Google/social sign-in was switched off in the Memberstack dashboard
+  (Aug 2026) — Mike wants name, surname and email from every member.
+  Collecting name/surname was still open at the end of that session: the
+  pre-built modal may not capture it, in which case the fix is a custom
+  form (`data-ms-form="signup"` + `data-ms-member="first-name"` etc.)
+  inside the "Not a member yet?" block on members.html.
 - Mike is flipping Memberstack from Test Mode to live himself.
 - Stripe is connected using Mike's personal details for now — his call
   (Aug 2026): he'll move money manually and swap in BARNA's real
   business/bank details later. Don't treat this as a launch blocker.
+
+## Deploying
+- Netlify auto-deploy is **off** (Mike disabled it to save credits), so
+  `git push` alone does NOT update the live site. After pushing, trigger
+  it by hand: Netlify → Deploys → Trigger deploy → Deploy site.
+- Live site: barna-site.netlify.app. The barna.co.uk domain still points
+  at the old Weebly site and hasn't been switched over yet.
+- Batch work into one commit and one deploy rather than pushing per edit.
 
 ## Working style
 - One task/page at a time, not bulk production.
