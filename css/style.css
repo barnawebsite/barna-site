@@ -231,26 +231,7 @@ section { padding: 56px 0; }
 .cta-band h2 { margin: 0 0 8px; }
 .cta-price { font-size: 20px; font-weight: bold; color: var(--offwhite); margin: 0 0 24px; }
 
-/* ---------- Webinar archive cards (Members Area) ---------- */
-.webinar-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-top: 18px;
-}
-.webinar-card {
-  border: 1px solid #e2e8ea;
-  border-radius: 8px;
-  padding: 20px 22px;
-}
-.webinar-card-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
-}
+/* ---------- Webinar shared bits (Members Area) ---------- */
 .webinar-date {
   color: var(--teal);
   font-weight: bold;
@@ -258,31 +239,65 @@ section { padding: 56px 0; }
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
-.webinar-access {
+.webinar-speaker { color: var(--navy); font-size: 13px; font-weight: bold; margin: 0 0 6px; }
+.webinar-links { margin-top: 8px; }
+.webinar-links a { color: var(--teal); font-weight: bold; font-size: 14px; margin-right: 20px; }
+
+/* ---------- Webinar recordings & resources (things you can watch/download) ---------- */
+.recording-list {
+  list-style: none;
+  padding: 0;
+  margin: 18px 0 0;
+  display: grid;
+  gap: 10px;
+}
+.recording-list li {
+  border: 1px solid #e2e8ea;
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-size: 15px;
+  color: var(--navy);
+}
+.recording-list .recording-speaker {
+  display: block;
+  color: #45606b;
+  font-size: 13px;
+  margin-top: 2px;
+}
+
+/* ---------- Past webinar archive (collapsed by default to keep the page short) ---------- */
+.webinar-archive {
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+}
+.webinar-archive details {
+  border: 1px solid #e2e8ea;
+  border-radius: 8px;
+  padding: 0 16px;
+}
+.webinar-archive summary {
+  cursor: pointer;
+  padding: 12px 0;
+  color: var(--navy);
+  font-size: 15px;
+  font-weight: bold;
+}
+.webinar-archive summary .webinar-date { display: block; margin-bottom: 3px; }
+.webinar-archive .archive-tag {
   display: inline-block;
+  background: var(--teal);
+  color: #fff;
   font-size: 11px;
   font-weight: bold;
   letter-spacing: 0.03em;
-  padding: 3px 11px;
+  padding: 2px 9px;
   border-radius: 999px;
+  margin-left: 6px;
   white-space: nowrap;
 }
-.webinar-access--done { background: #eef2f3; color: #45606b; }
-.webinar-card h3 { margin: 0 0 4px; font-size: 17px; color: var(--navy); }
-.webinar-speaker { color: var(--navy); font-size: 13px; font-weight: bold; margin: 0 0 10px; }
-.webinar-card p { color: #45606b; font-size: 14px; margin: 0; }
-.webinar-links a { color: var(--teal); font-weight: bold; font-size: 14px; margin-right: 20px; }
-
-/* ---------- Earlier resources (secondary, plain list) ---------- */
-.earlier-resources {
-  margin-top: 36px;
-  padding-top: 26px;
-  border-top: 1px solid #e2e8ea;
-}
-.earlier-resources h3 { font-size: 15px; color: var(--navy); margin: 0 0 6px; }
-.earlier-resources .earlier-note { font-size: 13px; color: #45606b; margin: 0 0 12px; }
-.earlier-resources ul { margin: 0; padding-left: 20px; }
-.earlier-resources li { color: #45606b; font-size: 14px; margin-bottom: 6px; }
+.webinar-archive .archive-body { padding: 0 0 14px; }
+.webinar-archive .archive-body p { color: #45606b; font-size: 14px; margin: 0; }
 .cta-benefits {
   list-style: none;
   display: inline-block;
