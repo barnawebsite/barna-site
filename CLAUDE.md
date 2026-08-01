@@ -81,6 +81,21 @@ Notes on why it's structured this way:
      `data-ms-price:add="prc_annual-barna-membership-3y5t08ng"`, so there
      is no route to an account that skips Stripe. This includes the
      footer "Join BARNA" link, which is repeated on every page.
+
+### ⚠️ GOING LIVE: the price ID must be swapped
+`prc_annual-barna-membership-3y5t08ng` is a **Test Mode** price ID. It does
+not exist in Live Mode. Confirmed the hard way (Aug 2026): with Memberstack
+switched to Live, signup created the account, silently failed to attach the
+plan, and never reached Stripe — so the member paid nothing AND stayed locked
+out by the `paid-plans` gate, with no error shown. It looks like a broken site.
+
+When BARNA goes live for real:
+1. Switch Memberstack to Live Mode.
+2. Copy the **Live** price ID from Plans → the £50/year plan.
+3. Find-and-replace the old ID across all `.html` files (17 occurrences,
+   10 files — one `sed`/replace, don't hand-edit).
+4. Commit, push, trigger the Netlify deploy.
+5. Test one real signup end to end before announcing it.
 - Memberstack script tag is on all pages. Signup is a modal
   (`data-ms-modal="signup"`), never a standalone page.
 - Google/social sign-in was switched off in the Memberstack dashboard
