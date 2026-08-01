@@ -28,7 +28,8 @@ developer, but is comfortable pasting/editing HTML directly.
   considering a page "done."
 
 ## Navigation (deliberately kept short)
-Home · About · Education & Clinical Practice · Paediatric Care · Members
+Home · About · Affiliations & Partners · Education & Clinical Practice ·
+Paediatric Care · Members Area
 
 Notes on why it's structured this way:
 - "Join" is NOT in the nav — it's a hero button + footer link only.
@@ -39,28 +40,45 @@ Notes on why it's structured this way:
   footer link (mailto to adela@barna.co.uk) since it rarely changes.
 - Paediatric Care is deliberately its own dedicated nav item — Mike asked
   for this specifically, it's a real focus area, not a subsection.
+- ABC Packs pages are NOT in the nav — reached via the Members Area
+  "Member Resources" cards only (they're gated member content).
 
 ## Current page status
 - `index.html`, `about.html`, `affiliations.html`, `education-clinical.html`,
   `members.html` — real content, built out.
-- `paediatric.html` — still a placeholder stub. Biggest remaining content
-  gap; blocked on Mike sourcing content from the old Weebly site — don't
+- `abc-packs.html` + `airway-grid.html` / `breathing-grid.html` /
+  `circulation-grid.html` — gated ABC learning-resource pages, built
+  Aug 2026 from the old site's Members Only Area. Small files served
+  locally from `assets/documents/abc-packs/`; 15 large presentations and
+  workbooks (10–160MB, too big for GitHub) link out to Google Drive
+  ("Anyone with the link" sharing, on Mike's Drive account). Local copies
+  of those large files sit in `_to-upload-google-drive/` (gitignored) as
+  backup.
+- `paediatric.html` — has the gated workbook download (`#workbook`
+  anchor) plus placeholder public copy. General specialty content is
+  still the biggest remaining gap; blocked on Mike sourcing it — don't
   build until he provides it.
+- `members.html` — fully built: Member Resources cards (ABC Packs,
+  Paediatric workbook), Eventbrite promo, webinar archive with
+  recordings/files linked, legacy "Earlier resources" list. The
+  `<!-- EDIT: add recording/slides link -->` comments on recent webinar
+  cards are intentional slots for future recordings, not gaps.
 - `join.html` was removed — Join is a modal (`data-ms-modal="signup"`)
   triggered from the hero button and footer link, not a standalone page.
-- Two PDFs on the homepage still point to the *old* Weebly-hosted URLs
-  (working, but temporary) — need migrating into `/files/` here before the
-  old site is retired.
+- The old Weebly site is no longer referenced anywhere — all assets
+  migrated (verified Aug 2026); it can be retired without breaking links.
+- BARNA Standards of Practice: checked Aug 2026, the 2012 edition is
+  current — no newer version exists despite the old site's "updated
+  soon" note.
 
 ## Membership (Memberstack)
-- Separate from this static site's build — Memberstack app is already set
-  up and tested (signup, manual member add, gated content all confirmed
-  working in Test Mode).
-- `members.html` will eventually sit behind Memberstack's gating once
-  wired in — not done yet, this file is still just a placeholder.
-- Stripe is connected but currently using placeholder/personal details —
-  needs swapping to BARNA's real business/bank details before real
-  payments go live.
+- Memberstack gating is wired into every gated page via
+  `data-ms-content="members"` / `"!members"` blocks; script tag on all
+  pages. Tested working in Test Mode.
+- Mike is flipping Memberstack from Test Mode to live himself.
+- Stripe is connected using Mike's personal details for now — his call
+  (Aug 2026): he'll move money manually and swap in BARNA's real
+  business/bank details later. Don't treat this as a launch blocker.
 
 ## Working style
 - One task/page at a time, not bulk production.
