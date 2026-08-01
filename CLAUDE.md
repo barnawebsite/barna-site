@@ -94,7 +94,7 @@ When BARNA goes live for real:
 2. Copy the **Live** price ID from Plans → the £50/year plan.
 3. Find-and-replace the old ID across all `.html` files (17 occurrences,
    10 files — one `sed`/replace, don't hand-edit).
-4. Commit, push, trigger the Netlify deploy.
+4. Commit and push (GitHub Pages publishes automatically).
 5. Test one real signup end to end before announcing it.
 - Memberstack script tag is on all pages. Signup is a modal
   (`data-ms-modal="signup"`), never a standalone page.
@@ -109,13 +109,34 @@ When BARNA goes live for real:
   (Aug 2026): he'll move money manually and swap in BARNA's real
   business/bank details later. Don't treat this as a launch blocker.
 
-## Deploying
-- Netlify auto-deploy is **off** (Mike disabled it to save credits), so
-  `git push` alone does NOT update the live site. After pushing, trigger
-  it by hand: Netlify → Deploys → Trigger deploy → Deploy site.
-- Live site: barna-site.netlify.app. The barna.co.uk domain still points
-  at the old Weebly site and hasn't been switched over yet.
-- Batch work into one commit and one deploy rather than pushing per edit.
+## Deploying — GitHub Pages
+- **Live site: https://barnawebsite.github.io/barna-site/**
+- `git push origin main` is the whole deploy. GitHub's "pages build and
+  deployment" workflow publishes in ~1 minute. No dashboards, no buttons,
+  no credits — the free tier allows ~10 builds/hour, so push freely.
+- Served from branch `main`, folder `/ (root)`. `.nojekyll` at the repo
+  root stops Jekyll rewriting anything; leave it there.
+- Every link in the site is **relative** — that's what lets it work from
+  the `/barna-site/` subpath. Never introduce `href="/..."` absolute
+  paths or they'll break until a custom domain is set.
+- Moved off Netlify Aug 2026: free tier gave 300 credits/month at 15 per
+  deploy (~20 deploys), and Mike ran out. GitHub Pages is free and
+  effectively unlimited for a static site. Netlify kept briefly as a
+  fallback, then deleted — don't reinstate it.
+
+### If a change doesn't appear on the live site
+Check the **output**, not the settings — this bit us three times in one
+day. Config that looks correct can still mean nothing ever ran:
+- Actions tab → is there a recent green "pages build and deployment"?
+- `curl -s https://api.github.com/repos/barnawebsite/barna-site/actions/runs?per_page=3`
+- Pages builds fire **on push only**. When Pages was first enabled, no
+  build existed until a fresh commit was pushed (an empty commit is a
+  fine way to force one: `git commit --allow-empty`).
+
+### Custom domain (not done yet)
+barna.co.uk still points at the old Weebly site. To switch: Settings →
+Pages → Custom domain, plus DNS records at the registrar. GitHub issues
+free HTTPS. That's the last step before Weebly can be retired.
 
 ## Working style
 - One task/page at a time, not bulk production.
