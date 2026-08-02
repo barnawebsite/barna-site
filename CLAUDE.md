@@ -140,16 +140,62 @@ that date itself, we built it:
   `true` (Settings → Secrets and variables → Actions → Variables).
 - Needs two things set in that same Settings page before it can run at
   all: secret `MEMBERSTACK_SECRET_KEY` (Admin API key) and variable
-  `MANUAL_ACCESS_PLAN_ID` (the plan's `pln_...` ID).
-- ⚠️ **Both of those are Test-Mode-specific right now** (same trap as
-  the price ID above) — when Memberstack goes Live, generate a new Live
-  Mode Admin API key and copy the Live Mode plan ID, and update both in
-  GitHub Settings, or this job will silently keep checking test data
-  while real legacy members' access never expires.
+  `MANUAL_ACCESS_PLAN_ID` (the plan's `pln_...` ID). Missing config
+  fails the job with an explicit message and changes nothing.
 - Removal here is a simple plan removal via Admin API — nothing manual,
   no separate "expired members list" to maintain. Whoever handles
   renewals should still check periodically who's expired and send the
   actual renewal email; this job only handles revoking access on time.
+- **Verified working end to end in Test Mode (Aug 2026):** a member one
+  day past expiry had their plan removed by the scheduled run and lost
+  members-area access; a member expiring in 2027 was untouched and kept
+  full access. Secrets/variables are configured and LIVE mode is on.
+
+#### Undocumented API call — where it came from
+Memberstack's public REST docs cover Data Tables only; plan add/remove
+is documented purely as the `@memberstack/admin` npm package. The real
+call, read out of that package's source, is
+`POST /members/{id}/remove-plan` with `{"planId": ...}`, and it returns
+plain `OK`, not JSON. (`DELETE /members/{id}/plans/{connectionId}` is
+*not* a real endpoint — it 404s; that mistake cost a failed live run.)
+If this ever starts 404ing, re-download the npm tarball and re-read
+`lib/methods/members/index.js` rather than guessing.
+
+#### ⚠️ Admin API cannot set a password on an existing member
+`CreateMember` accepts `password`; `UpdateMember` does not — a PATCH
+with a password returns `200 OK` and silently ignores it. So there is
+no admin route to "just set a password" for someone. Consequences:
+- Legacy members must set their own password via signup or password
+  reset, which means **working transactional email is a hard blocker on
+  onboarding them** (see the sender-domain problem: Memberstack rejects
+  free domains like gmail/googlemail, so it needs a real `barna.co.uk`
+  mailbox plus SPF/DKIM DNS records — and nobody currently has access to
+  the registrar or the old `connectwithbarna@googlemail.com` account).
+- For *test* members only, the workaround is delete + recreate with a
+  password in the create call, then PATCH `verified: true`.
+
+### ⚠️ GOING LIVE: the expiry job needs rewiring too
+Test and Live are separate datasets in Memberstack — nothing carries
+over. Green ✅ runs prove nothing if the job is pointed at test data.
+When BARNA goes live:
+1. Recreate the **"BARNA Member — Manual Access"** plan in Live Mode and
+   link it to the **"BARNA - Members area"** Gated Content group (or the
+   gate won't open for legacy members).
+2. Recreate the **`accessexpiresat`** custom field in Live Mode.
+3. Generate a **Live Mode** Admin API key → update the
+   `MEMBERSTACK_SECRET_KEY` repo secret.
+4. Copy the **Live Mode** plan ID → update the `MANUAL_ACCESS_PLAN_ID`
+   repo variable.
+5. Run the workflow manually **with `EXPIRY_CHECK_LIVE_MODE` unset or
+   `false` first** and read the dry-run log against real members before
+   letting it delete anything.
+
+### ⚠️ GitHub disables cron on inactive public repos after 60 days
+This repo is public and static, so it can easily sit untouched for
+months — at which point GitHub **automatically disables the scheduled
+workflow** and expiry silently stops happening. GitHub emails the repo
+owner first, but it's easy to miss. Either push something occasionally
+or re-enable it from the Actions tab when warned.
 
 ## Deploying — GitHub Pages
 - **Live site: https://barnawebsite.github.io/barna-site/**
