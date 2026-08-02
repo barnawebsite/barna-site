@@ -23,8 +23,23 @@ import datetime
 import urllib.request
 import json
 
-API_KEY = os.environ["MEMBERSTACK_SECRET_KEY"]
-PLAN_ID = os.environ["MANUAL_ACCESS_PLAN_ID"]
+def require_env(name, where, example=""):
+    value = os.environ.get(name, "").strip()
+    if not value:
+        hint = f"\n  Example value: {example}" if example else ""
+        sys.exit(
+            f"\nERROR: {name} is not set, so this job cannot run.\n\n"
+            f"  Fix: GitHub repo -> Settings -> Secrets and variables -> Actions\n"
+            f"       -> {where} tab -> add '{name}'.{hint}\n\n"
+            f"  Nothing was changed in Memberstack.\n"
+        )
+    return value
+
+
+API_KEY = require_env("MEMBERSTACK_SECRET_KEY", "Secrets")
+PLAN_ID = require_env(
+    "MANUAL_ACCESS_PLAN_ID", "Variables", "pln_barna-member-manual-access-xx8x0ihb"
+)
 LIVE = os.environ.get("EXPIRY_CHECK_LIVE_MODE", "false").strip().lower() == "true"
 BASE_URL = "https://admin.memberstack.com"
 
