@@ -42,6 +42,13 @@ Notes on why it's structured this way:
   for this specifically, it's a real focus area, not a subsection.
 - ABC Packs pages are NOT in the nav — reached via the Members Area
   "Member Resources" cards only (they're gated member content).
+- Social links (Instagram, Facebook, LinkedIn, Eventbrite) live in the
+  shared footer as `.footer-social`, added Aug 2026. Icons are inline
+  SVG — no image files, they inherit colour via `currentColor`, so a
+  brand-colour change in `css/style.css` carries through. The Eventbrite
+  one is a generic ticket glyph, not Eventbrite's real logo mark.
+  Tracking parameters (`igsh`, `mibextid`, `viewAsMember`) were stripped
+  from the URLs Mike supplied — don't paste them back in.
 
 ## Current page status
 - `index.html`, `about.html`, `affiliations.html`, `education-clinical.html`,
