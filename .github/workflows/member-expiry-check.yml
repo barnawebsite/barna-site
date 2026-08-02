@@ -1,0 +1,24 @@
+name: BARNA Member Expiry Check
+
+on:
+  schedule:
+    # 07:00 UTC daily
+    - cron: "0 7 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  check-expiry:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run expiry check
+        env:
+          MEMBERSTACK_SECRET_KEY: ${{ secrets.MEMBERSTACK_SECRET_KEY }}
+          MANUAL_ACCESS_PLAN_ID: ${{ vars.MANUAL_ACCESS_PLAN_ID }}
+          EXPIRY_CHECK_LIVE_MODE: ${{ vars.EXPIRY_CHECK_LIVE_MODE }}
+        run: python scripts/check_member_expiry.py

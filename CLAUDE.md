@@ -120,6 +120,37 @@ When BARNA goes live for real:
   (Aug 2026): he'll move money manually and swap in BARNA's real
   business/bank details later. Don't treat this as a launch blocker.
 
+### Legacy member access + automatic expiry
+Memberstack has no built-in expiration date for manually-granted free
+plans, so ~91 pre-existing members are being migrated onto a free
+**"BARNA Member — Manual Access"** plan instead of paying via Stripe,
+each with an exact cutoff date instead of a fresh 12-month term (their
+call, not ours — no free extra months). Since Memberstack can't enforce
+that date itself, we built it:
+- Each such member gets a custom field `accessexpiresat` (format
+  `DD/MM/YYYY`) set to their real expiry date.
+- `.github/workflows/member-expiry-check.yml` runs
+  `scripts/check_member_expiry.py` daily (07:00 UTC + manual
+  `workflow_dispatch`). It only ever looks at members on the Manual
+  Access plan — real Stripe-paying members are untouched — and removes
+  the plan from anyone whose `accessexpiresat` has passed, which
+  correctly re-locks the `barna-members-area` gate for them.
+- **Defaults to dry run** (logs what it would do, changes nothing).
+  Flip it live by setting the repo variable `EXPIRY_CHECK_LIVE_MODE` to
+  `true` (Settings → Secrets and variables → Actions → Variables).
+- Needs two things set in that same Settings page before it can run at
+  all: secret `MEMBERSTACK_SECRET_KEY` (Admin API key) and variable
+  `MANUAL_ACCESS_PLAN_ID` (the plan's `pln_...` ID).
+- ⚠️ **Both of those are Test-Mode-specific right now** (same trap as
+  the price ID above) — when Memberstack goes Live, generate a new Live
+  Mode Admin API key and copy the Live Mode plan ID, and update both in
+  GitHub Settings, or this job will silently keep checking test data
+  while real legacy members' access never expires.
+- Removal here is a simple plan removal via Admin API — nothing manual,
+  no separate "expired members list" to maintain. Whoever handles
+  renewals should still check periodically who's expired and send the
+  actual renewal email; this job only handles revoking access on time.
+
 ## Deploying — GitHub Pages
 - **Live site: https://barnawebsite.github.io/barna-site/**
 - `git push origin main` is the whole deploy. GitHub's "pages build and
