@@ -320,6 +320,8 @@ section { padding: 56px 0; }
   font-weight: bold;
 }
 .cta-actions { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+.cta-student { margin: 0 0 22px; font-size: 15px; color: var(--offwhite); }
+.cta-student a { color: var(--teal); font-weight: bold; }
 
 .promo-code-line { margin: 0 0 24px; font-size: 15px; color: var(--offwhite); }
 .promo-code {
