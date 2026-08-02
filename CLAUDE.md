@@ -74,8 +74,19 @@ Notes on why it's structured this way:
 ## Membership (Memberstack)
 - **Paid-only by design.** Two halves that must stay in sync — if you add
   a gated page, do both or the gate leaks:
-  1. Gated blocks use `data-ms-content="paid-plans"` / `"!paid-plans"`.
-     Never `"members"` — that only means "logged in", so a free account
+  1. Gated blocks use `data-ms-content="barna-members-area"` /
+     `"!barna-members-area"` — the key of the "BARNA - Members area"
+     Gated Content group in the Memberstack dashboard, which both
+     `BARNA Member — Annual` (paid) and `BARNA Member — Manual Access`
+     (free, used for legacy-member migration) are linked to. **Do not use
+     the reserved keyword `"paid-plans"`** — confirmed with Memberstack
+     support (Aug 2026) that it specifically means "has an active
+     Stripe-connected paid/subscription plan," so it silently excludes
+     any FREE-type plan (like Manual Access) even though the member has
+     active, legitimate access. If a new plan is ever added and it should
+     also unlock this content, link it to the "BARNA - Members area"
+     group in the dashboard, not just to the gate in code. Never
+     `"members"` either — that only means "logged in", so a free account
      would see everything.
   2. Every signup link carries
      `data-ms-price:add="prc_annual-barna-membership-3y5t08ng"`, so there
@@ -87,7 +98,7 @@ Notes on why it's structured this way:
 not exist in Live Mode. Confirmed the hard way (Aug 2026): with Memberstack
 switched to Live, signup created the account, silently failed to attach the
 plan, and never reached Stripe — so the member paid nothing AND stayed locked
-out by the `paid-plans` gate, with no error shown. It looks like a broken site.
+out by the `barna-members-area` gate, with no error shown. It looks like a broken site.
 
 When BARNA goes live for real:
 1. Switch Memberstack to Live Mode.

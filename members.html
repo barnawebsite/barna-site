@@ -35,15 +35,15 @@
 <section class="page-header" style="padding-bottom: 20px;">
   <div class="wrap">
     <h1>Members Area</h1>
-    <p class="lead" data-ms-content="!paid-plans">Access your BARNA membership, or join to get started.</p>
-    <div class="header-login" data-ms-content="!paid-plans">
+    <p class="lead" data-ms-content="!barna-members-area">Access your BARNA membership, or join to get started.</p>
+    <div class="header-login" data-ms-content="!barna-members-area">
       <a href="#" data-ms-modal="login" data-ms-redirect="current-url" class="btn btn-outline">Log In</a>
     </div>
   </div>
 </section>
 
 <!-- ============ LOGGED OUT: shown to visitors who aren't signed in ============ -->
-<section class="cta-band" data-ms-content="!paid-plans" style="padding-top: 0;">
+<section class="cta-band" data-ms-content="!barna-members-area" style="padding-top: 0;">
   <div class="wrap">
     <h2>Not a member yet?</h2>
     <p class="cta-price">£50 / year</p>
@@ -64,12 +64,12 @@
 </section>
 
 <!-- ============ PAID MEMBERS: shown once a member has an active paid plan ============ -->
-<!-- Gated on data-ms-content="paid-plans", NOT "members" — "members" means "logged in at all",
+<!-- Gated on data-ms-content="barna-members-area", NOT "members" — "members" means "logged in at all",
      which would let a free account see everything. Every signup link on the site also carries
      data-ms-price:add so there's no route to an account without going through Stripe. Keep both
      halves in place if you add pages: the gate alone isn't enough if a signup link forgets the price.
      EDIT: conference discount details and AGM voting are still to be built into this gated area. -->
-<div data-ms-content="paid-plans">
+<div data-ms-content="barna-members-area">
 
   <section class="content-section">
     <div class="wrap">
