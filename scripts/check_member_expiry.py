@@ -56,10 +56,24 @@ def api_get(path):
         return json.loads(resp.read())
 
 
-def api_delete(path):
-    req = urllib.request.Request(f"{BASE_URL}{path}", headers=COMMON_HEADERS, method="DELETE")
+def remove_plan(member_id, plan_id):
+    """Remove a free plan from a member.
+
+    Mirrors the official @memberstack/admin package's removeFreePlan():
+    POST /members/{id}/remove-plan with {"planId": ...}. This endpoint isn't
+    in the public REST docs — it was taken from the npm package's source, so
+    check there first if it ever starts 404ing. Returns plain "OK", not JSON.
+    """
+    body = json.dumps({"planId": plan_id}).encode()
+    headers = dict(COMMON_HEADERS, **{"Content-Type": "application/json"})
+    req = urllib.request.Request(
+        f"{BASE_URL}/members/{member_id}/remove-plan",
+        data=body,
+        headers=headers,
+        method="POST",
+    )
     with urllib.request.urlopen(req) as resp:
-        return json.loads(resp.read())
+        return resp.read().decode(errors="replace").strip()
 
 
 def fetch_all_members():
@@ -144,7 +158,7 @@ def main():
     failures = 0
     for email, member_id, conn_id, expiry in to_remove:
         try:
-            api_delete(f"/members/{member_id}/plans/{conn_id}")
+            remove_plan(member_id, PLAN_ID)
             print(f"  removed: {email}")
         except Exception as e:
             failures += 1
