@@ -228,7 +228,15 @@ day. Config that looks correct can still mean nothing ever ran:
   build existed until a fresh commit was pushed (an empty commit is a
   fine way to force one: `git commit --allow-empty`).
 
-### Custom domain (not done yet)
+### Custom domain (not done yet) — see `dns-cutover.md`
+`dns-cutover.md` at the repo root is the prepared step-by-step for this:
+current DNS snapshot, the exact GitHub Pages records, the Memberstack
+sender setup, DMARC, and the order to do them in. Written Aug 2026 while
+waiting on domain access, so the cutover is copy-paste rather than
+research. **Its "Do not break email" section matters most** — MX and SPF
+must survive the move, and there must only ever be one SPF record.
+
+
 barna.co.uk still points at the old Weebly site. To switch: Settings →
 Pages → Custom domain, plus DNS records at the registrar. GitHub issues
 free HTTPS. That's the last step before Weebly can be retired.
