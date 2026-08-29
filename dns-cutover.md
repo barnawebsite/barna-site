@@ -239,3 +239,57 @@ that is usually caching rather than a mistake.
 - **The domain renews May 2027.** Whoever holds it needs to actually
   receive that reminder. Getting invoices to a current officer is what
   started this whole exercise.
+
+---
+
+## 9. Nominet registrant and data quality (Aug 2026)
+
+Separate job from the DNS above, but time limited, so it is written down.
+
+**Where it stands.** Alan Jewitt updated the domain's contact details at
+Nominet to Michele Converso. The WHOIS now reads:
+
+| Field | Value |
+|---|---|
+| Registrant | **Abacus Computer Training** (wrong, historic) |
+| Organisation type | UK Registered Charity |
+| Organisation number | 1039150 (BARNA's charity number) |
+| Trading name | British Anaesthetic and Recovery Nurses Association |
+| Contact | Michele Converso, `michele.converso@hotmail.it` |
+| Data Quality | **Awaiting validation** |
+
+**Why it is probably failing validation.** Nominet checks the registrant
+name and address against third party data sources. The record now claims
+to be UK Registered Charity 1039150, but charity 1039150 is named
+British Anaesthetic and Recovery Nurses Association, not Abacus Computer
+Training. Those cannot match. Waiting for validation to pass on its own
+is therefore unlikely to work; the name has to be corrected.
+
+**Why it matters.** Nominet's data quality process applies a data
+quality lock after 30 days if the data stays unvalidated. That suspends
+the domain, which stops the website and any email on it from working,
+and a suspended domain can no longer be modified or transferred.
+Nominet does **not** delete domains suspended this way, so this is
+recoverable, but it would take the site down.
+
+**Who does the fix.** A registrant name change is a Nominet "Registrant
+Transfer", £10 plus VAT, initiated by whoever controls the domain's
+admin contact email. That is now Mike, which is why Alan said he can no
+longer do it himself. Steps:
+
+1. Activate a free Nominet Online Services account using
+   `michele.converso@hotmail.it` (the "first time logging in" page
+   emails a password link). Login is tied to that exact address.
+2. Select barna.co.uk, choose "transfer domain", enter the new
+   registrant email, pay the £10 plus VAT.
+3. Accept the transfer from the email **within 5 days** or it times out
+   and the fee is refunded. On accepting, enter BARNA as the registrant:
+   British Anaesthetic and Recovery Nurses Association, UK Registered
+   Charity, 1039150.
+4. Use an address that will validate against a third party source for
+   the charity, ideally BARNA's registered charity address rather than
+   an individual's.
+
+**This does not block section 3.** The A records and the website move
+are independent of the registrant name. Do not let the Nominet job hold
+up the cutover.
