@@ -79,9 +79,36 @@ AAAA  @   2606:50c0:8003::153
 CNAME   www   barnawebsite.github.io.
 ```
 
-Then in GitHub: repo → Settings → Pages → Custom domain → enter
-`barna.co.uk` → Save. This automatically commits a `CNAME` file to the
-repo root. **Do not delete that file**, the site breaks without it.
+### ⚠️ Do the GitHub side FIRST, before the DNS records
+
+This is the step that was missed on the first attempt (Aug 2026) and it
+is why the cutover failed. Alan added the DNS records correctly, but
+GitHub had never been told that `barna.co.uk` belongs to this repo, so
+it had no idea where to route the request and served
+**"There isn't a GitHub Pages site here."** The DNS was reverted and the
+old Weebly site came back. Nothing was broken, but a day was lost.
+
+The two halves are independent and GitHub's half can be done at any
+time, with or without the DNS pointing at it:
+
+- **GitHub half:** a file named `CNAME` in the repo root containing the
+  single line `barna.co.uk`. Repo → Settings → Pages → Custom domain →
+  enter `barna.co.uk` → Save does exactly this and nothing more, so
+  committing the file by hand is equivalent. It is already committed to
+  this repo. **Do not delete it**, the site breaks without it.
+- **DNS half:** the A and CNAME records above, made at the registrar.
+
+GitHub will show a red "DNS check unsuccessful" warning on the Pages
+settings page until the DNS half is done. That is expected and correct.
+It saves the setting anyway.
+
+**Side effect while you wait:** once the `CNAME` file exists, GitHub
+redirects `https://barnawebsite.github.io/barna-site/` to
+`https://barna.co.uk`. So during the gap between the two halves, the
+github.io preview link stops showing the new site and lands on the old
+Weebly one instead. This is temporary and expected, not a fault. If the
+preview link is needed again before the DNS is done, delete the `CNAME`
+file, push, and it comes straight back.
 
 Once the DNS has propagated and GitHub shows the domain as verified,
 tick **Enforce HTTPS** on the same page. GitHub issues the certificate
@@ -143,20 +170,32 @@ later job, only after confirming legitimate mail passes.
 
 Doing these one at a time makes it obvious what broke if something does.
 
+0. **Commit the `CNAME` file** (section 3). Costs nothing, breaks
+   nothing, and without it every later DNS change fails. Done Aug 2026.
 1. Get control of the domain and DNS. Confirm you can log in and see the
    existing records.
 2. If moving hosts, recreate MX and SPF at the new host **first**, and
    confirm mail still works.
-3. Create the mailbox for Memberstack (e.g. `info@barna.co.uk`) and
+3. Repoint the A records and the www CNAME at GitHub Pages (section 3).
+   Wait for it to resolve, then check the site loads on barna.co.uk.
+4. Enable Enforce HTTPS once GitHub verifies the domain.
+5. Add `barna.co.uk` to Memberstack's allowed domains, or the login and
+   signup modals will not work on the new address.
+6. Create the mailbox for Memberstack (e.g. `info@barna.co.uk`) and
    confirm you can send and receive from it.
-4. Add Memberstack's DKIM records, verify the sender in their dashboard,
+7. Add Memberstack's DKIM records, verify the sender in their dashboard,
    and send a test signup to confirm the welcome email arrives.
-5. Only then repoint the A records at GitHub Pages (section 3). The
-   website move is the most visible change, so do it last, once email is
-   proven.
-6. Enable Enforce HTTPS once GitHub verifies the domain.
-7. Add DMARC.
-8. Retire the old Weebly site.
+8. Add DMARC.
+9. Retire the old Weebly site.
+
+Note this reverses the original advice, which put the website move last
+after email was proven. That order was written when the domain handover
+looked slow and email looked quick. In practice it is the other way
+round: the website move is a single DNS change with a known-good
+rollback, while the email side is blocked on getting a real mailbox. The
+site move no longer needs to wait for it. The MX and SPF records are
+untouched by the A record change, so moving the website first cannot
+affect email either way.
 
 ---
 
@@ -188,6 +227,15 @@ that is usually caching rather than a mistake.
   Some hosts offer ALIAS or ANAME records, which do the same job.
 - **Deleting the `CNAME` file** from the repo silently unsets the custom
   domain. It gets recreated by GitHub when you re-save the setting.
+- **"There isn't a GitHub Pages site here."** on barna.co.uk does not
+  mean the DNS is wrong. It means the DNS is right and arriving at
+  GitHub, but the `CNAME` file or Pages custom domain setting is
+  missing, so GitHub cannot tell which repo the request is for. Fix the
+  GitHub side, do not touch the DNS.
+- **Memberstack has its own domain allowlist.** Signup, login and the
+  gated members area are checked against it. `barna.co.uk` needs adding
+  in the Memberstack dashboard or the members area will break on the new
+  address while working fine on github.io.
 - **The domain renews May 2027.** Whoever holds it needs to actually
   receive that reminder. Getting invoices to a current officer is what
   started this whole exercise.
