@@ -312,3 +312,107 @@ longer do it himself. Steps:
 **This does not block section 3.** The A records and the website move
 are independent of the registrant name. Do not let the Nominet job hold
 up the cutover.
+
+---
+
+## 10. Taking full control: moving off SYPO
+
+The website is live, but DNS still sits on `ns1–4.stackdns.com`, which is
+Sypo's platform and nobody at BARNA has a login for. That is the only
+reason repointing the site needed emails to Alan. Moving the registrar is
+what fixes it permanently.
+
+Three separate layers, easy to confuse:
+
+| Layer | Who holds it (Aug 2026) | How to change it |
+|---|---|---|
+| Registrant (legal owner) | **BARNA** ✅ already done | Nominet, registrant transfer |
+| Registrar (manager) | Web by Numbers, tag `SYPO` | Nominet → **Change Registrar** |
+| DNS hosting | `stackdns.com` | nameservers, at the new host |
+
+### Records that must exist at the new host BEFORE the switch
+
+Copy these exactly. Everything starts blank at a new host, and anything
+missed here breaks silently.
+
+```
+A      @      185.199.108.153
+A      @      185.199.109.153
+A      @      185.199.110.153
+A      @      185.199.111.153
+CNAME  www    barnawebsite.github.io.
+MX     @      10 mx.stackmail.com          <- see warning below
+TXT    @      v=spf1 include:spf.stackmail.com a mx ~all
+```
+
+### ⚠️ The MX is a trap on this particular move
+
+`mx.stackmail.com` **is Sypo's own mail platform**. Once BARNA leaves
+Sypo, that mailbox host may stop accepting mail for the domain. Copying
+the MX across verbatim would then leave a record pointing at a dead
+server, which silently blackholes anything sent to `@barna.co.uk` rather
+than bouncing it.
+
+No `@barna.co.uk` mailboxes are actually in use, so nothing is lost today.
+But decide deliberately at the time:
+- moving mail to a new provider → point MX at **them**, and update the
+  SPF `include:` to match
+- not setting up mail yet → it is more honest to remove the MX than to
+  leave one aimed at a host that no longer serves the domain
+
+Only ever one SPF record. Merge, never add a second.
+
+### Order
+
+1. Choose the host and create the account. Needs DNS control and, if mail
+   is going there too, mailboxes. Web hosting is **not** needed — the site
+   is on GitHub Pages.
+2. Build the full DNS zone there, using the records above, with the MX
+   decision made.
+3. Get the new registrar's **Nominet tag** (e.g. `123-REG`, `20I`).
+4. Nominet Online Services → select barna.co.uk → **Change Registrar** →
+   enter the tag. This is *not* "Transfer Domain", which changes the owner.
+5. Point the nameservers at the new host.
+6. Verify with the `dig` commands in section 7 before assuming it worked.
+   The site must still load and the MX must still resolve.
+
+Nothing changes on the GitHub side. The `CNAME` file stays exactly as it
+is and the site keeps working, provided those four A records land
+identically.
+
+### After the move, this becomes possible
+
+- Repointing the site at anything else is four A records in a control
+  panel, no third party involved.
+- The Memberstack custom email sender (one MX, two TXT) can finally be set
+  up, which is what makes onboarding the 91 legacy members respectable.
+- DMARC (section 5) can go in.
+
+---
+
+## 11. Outstanding, as of 31 Aug 2026
+
+Live and working: domain, HTTPS, Memberstack in live mode, payments,
+discount codes, gated members area.
+
+**Next, and gating most of the rest:**
+- Move the registrar off SYPO (section 10). Everything below waits on the
+  DNS control this gives.
+
+**Then:**
+- Memberstack custom email sender + its DKIM records (section 4).
+- Onboard the ~91 legacy members onto Manual Access with `accessexpiresat`
+  dates. Possible today via Memberstack's default sender, but better after
+  the custom sender exists.
+- DMARC (section 5).
+- Retire the old Weebly site.
+
+**Small, independent:**
+- 50% student discount code in Stripe, if still wanted.
+- Update the `MEMBERSTACK_SECRET_KEY` repo secret with a **Live** Admin API
+  key. `MANUAL_ACCESS_PLAN_ID` does *not* change — verified identical in
+  both modes.
+- Confirm the `accessexpiresat` custom field exists in Live.
+- Untick the two WHOIS privacy flags at Nominet if still set. A charity is
+  not eligible for the opt-out, and the address is public on the charity
+  register anyway.
