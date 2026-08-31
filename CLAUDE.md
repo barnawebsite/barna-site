@@ -142,6 +142,63 @@ things that genuinely differ between the two modes.
   (Aug 2026): he'll move money manually and swap in BARNA's real
   business/bank details later. Don't treat this as a launch blocker.
 
+### Memberstack redirects — mind the old `/barna-site/` path
+Set in **Plans → Default Settings → Redirects**, not in the code. They are
+app-wide; both plans leave their own redirects blank and inherit these.
+
+When the site moved from `barnawebsite.github.io/barna-site/` to the domain
+root (31 Aug 2026) all three still pointed at `/barna-site/members.html`, so
+the first real signup landed on a GitHub 404 straight after paying. Current
+values:
+
+| Redirect | Value |
+|---|---|
+| On Signup / On Purchase | `/members.html` |
+| On Login | `/members.html` |
+| On Logout | `/` |
+
+Note `/members` also resolves — GitHub Pages maps it to `members.html` — but
+`/account`, `/profile`, `/dashboard` and `/join` all 404, so don't invent
+extensionless paths. This is plain static hosting with no routing.
+
+### The member record is created BEFORE payment
+Memberstack creates the account first, then hands off to Stripe. So:
+- a "new member" notification arrives before any money moves, and a second
+  one once the plan attaches. Both are normal.
+- anyone who abandons at the Stripe page leaves a member record with **no
+  plan**. They get no access, because the `barna-members-area` gate keys off
+  the plan and not the account, so this is noise rather than a hole.
+- **member count will run above paid count.** "Is a member" does not mean
+  "has paid". Worth remembering when migrating the legacy 91.
+
+This halfway state is almost certainly what produced the old (now corrected)
+note claiming signup "silently failed" because of the price ID.
+
+### Discount codes live in Stripe, not Memberstack
+Memberstack's Plans → Discounts page hands off to Stripe. Create them at
+Stripe → **Products → Coupons → + New**.
+
+Two traps, both hit on 31 Aug 2026:
+1. **Test mode coupons only work in test mode.** A coupon made on the test
+   side is simply "invalid" at a live checkout, with no useful error.
+2. **A coupon is not a promo code.** The coupon is the rule; the customer
+   types a *promotion code*. Switch on "Use customer-facing promotion codes"
+   at the bottom of the coupon form and enter the code there. Putting the
+   string in the coupon's Name field does nothing.
+
+Also: Stripe rejects a coupon that lands the price between about £0.01 and
+£1. Not an issue at £50, but it would be on a cheaper plan.
+
+Live codes:
+- `BARNA-COMP-9F4TQ2` — 100% off, Forever, capped at 5 redemptions and
+  expiring 30 Nov 2026. Comp/testing access. **Deliberately capped and
+  dated so a leak cannot become permanent — keep those limits on it.**
+- A 50% student code was planned (`Once` duration, expiring end of academic
+  year) — check Stripe for whether it was actually created.
+
+If the student rate becomes permanent, a separate £25 student *plan* is
+cleaner than a code: nothing to leak, and the count is visible.
+
 ### Legacy member access + automatic expiry
 Memberstack has no built-in expiration date for manually-granted free
 plans, so ~91 pre-existing members are being migrated onto a free
