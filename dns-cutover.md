@@ -362,7 +362,45 @@ But decide deliberately at the time:
 
 Only ever one SPF record. Merge, never add a second.
 
-### Order
+### DECIDED (31 Aug 2026): Cloudflare for registrar + DNS
+
+Email is deliberately **not** moving with it. BARNA's shared Google account
+is Jane's personal one with live correspondence running through it, so that
+is an organisational conversation, not a technical task. Memberstack does
+not need a barna.co.uk address either — it sends from its own default.
+Cloudflare Email Routing can forward `info@barna.co.uk` to a personal inbox
+for free later, without a mailbox, if that is ever wanted.
+
+Why Cloudflare: supports `.co.uk`, free DNS, domains at cost with no
+markup, no bundled web hosting or mailboxes to pay for. No transfer fee,
+and `.uk` transfers do not add a year, so the 15 May 2027 expiry stands.
+
+#### ⚠️ The order is strict and getting it wrong auto-rejects the transfer
+
+Cloudflare requires the domain to be **Active on Cloudflare DNS before**
+you can buy the registration. And from their docs: *"if you request your
+current registrar to update the IPS tag before completing the checkout
+process, the transfer request will be automatically rejected."* Their
+forum is full of `.uk` domains stuck exactly this way.
+
+Nominet Online Services does **not** expose nameserver editing to
+registrants, so Sypo has to make two of these changes:
+
+1. Add barna.co.uk to Cloudflare, free plan.
+2. **Check every record imported.** Cloudflare's scan misses things. Compare
+   against the list above: four A records, www CNAME, MX, SPF. This is where
+   email dies if you are careless.
+3. Set the A records and www CNAME to **DNS only** (grey cloud, not orange).
+   GitHub Pages behind a Cloudflare proxy works, but with Enforce HTTPS on,
+   a wrong SSL mode gives redirect loops. Grey cloud keeps behaviour
+   identical to today. Turn proxying on later, deliberately, on its own.
+4. **Ask Sypo** to point the nameservers at Cloudflare's two.
+5. Wait for the Cloudflare zone to read **Active**. Do not skip ahead.
+6. Complete the Cloudflare Registrar checkout.
+7. **Only now** ask Sypo to change the IPS tag to `CLOUDFLARE`.
+8. Verify with the `dig` commands in section 7.
+
+### Order (generic, if not going to Cloudflare)
 
 1. Choose the host and create the account. Needs DNS control and, if mail
    is going there too, mailboxes. Web hosting is **not** needed — the site
