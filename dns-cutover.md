@@ -9,7 +9,26 @@ which as of Aug 2026 is being transferred from Web by Numbers / Sypo.
 
 ---
 
-## 1. What is live right now (Aug 2026)
+## 0. DONE: cutover completed 31 Aug 2026
+
+The website move is finished. barna.co.uk serves the new GitHub Pages site
+over HTTPS. Kept below for the record and for the parts still outstanding.
+
+| Check | State on 31 Aug 2026 |
+|---|---|
+| A records | all four GitHub IPs |
+| www | CNAME to barnawebsite.github.io, 301s to the apex |
+| MX / SPF | untouched, email unaffected |
+| HTTPS | Let's Encrypt cert for barna.co.uk issued 13:57 UTC, auto-renews |
+| Nominet data quality | validated 31 Aug 2026, registrant corrected to BARNA |
+
+Still outstanding: Enforce HTTPS tickbox, the registrar move off SYPO
+(section 9), a mailbox on the domain, Memberstack Live Mode and its DKIM
+records, DMARC, and retiring the old Weebly site.
+
+---
+
+## 1. What was live before the change (Aug 2026)
 
 Snapshot taken before any changes, so it can be compared or restored.
 
