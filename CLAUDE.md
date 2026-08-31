@@ -245,11 +245,24 @@ If this ever starts 404ing, re-download the npm tarball and re-read
 with a password returns `200 OK` and silently ignores it. So there is
 no admin route to "just set a password" for someone. Consequences:
 - Legacy members must set their own password via signup or password
-  reset, which means **working transactional email is a hard blocker on
-  onboarding them** (see the sender-domain problem: Memberstack rejects
-  free domains like gmail/googlemail, so it needs a real `barna.co.uk`
-  mailbox plus SPF/DKIM DNS records — and nobody currently has access to
-  the registrar or the old `connectwithbarna@googlemail.com` account).
+  reset. This was previously written up as a **hard blocker** requiring a
+  `barna.co.uk` mailbox first. **That is wrong** — checked 31 Aug 2026:
+  Memberstack sends transactional email from its own `no-reply@memberstack.io`
+  by default, so password resets work today with no mailbox and no DNS
+  records. Confirmed in practice: signup emails arrived fine while the only
+  address on the account was a personal hotmail one.
+- A custom sender (**Settings → Email Sender Address**) is therefore a
+  quality decision, not a prerequisite. It buys mail from `@barna.co.uk`
+  and better deliverability. It needs **one MX and two TXT records**, so it
+  still waits on DNS control, i.e. the registrar move off SYPO.
+  ⚠️ Memberstack uses Resend and asks for an **MX record** — the existing
+  `mx.stackmail.com` MX must survive. Resend normally puts its MX on a
+  subdomain, but verify at the time rather than assuming. See the "Do not
+  break email" section of `dns-cutover.md`.
+- Judgement call for the 91: sending from `memberstack.io` works, but
+  Memberstack has a known issue with verification and welcome mail landing
+  in spam. For a one-off bulk onboarding of 91 people, set up the custom
+  sender first — 91 undelivered password resets becomes 91 support emails.
 - For *test* members only, the workaround is delete + recreate with a
   password in the create call, then PATCH `verified: true`.
 
