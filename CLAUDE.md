@@ -100,20 +100,35 @@ Notes on why it's structured this way:
      is no route to an account that skips Stripe. This includes the
      footer "Join BARNA" link, which is repeated on every page.
 
-### ⚠️ GOING LIVE: the price ID must be swapped
-`prc_annual-barna-membership-3y5t08ng` is a **Test Mode** price ID. It does
-not exist in Live Mode. Confirmed the hard way (Aug 2026): with Memberstack
-switched to Live, signup created the account, silently failed to attach the
-plan, and never reached Stripe — so the member paid nothing AND stayed locked
-out by the `barna-members-area` gate, with no error shown. It looks like a broken site.
+### GOING LIVE: done 31 Aug 2026, and the price ID did NOT need swapping
+`prc_annual-barna-membership-3y5t08ng` is the same in Test and Live. This
+note previously said the opposite in strong terms — that it was a Test-only
+ID that had to be found-and-replaced across 17 places. **That was wrong**,
+and acting on it would have broken working signup links.
 
-When BARNA goes live for real:
-1. Switch Memberstack to Live Mode.
-2. Copy the **Live** price ID from Plans → the £50/year plan.
-3. Find-and-replace the old ID across all `.html` files (17 occurrences,
-   10 files — one `sed`/replace, don't hand-edit).
-4. Commit and push (GitHub Pages publishes automatically).
-5. Test one real signup end to end before announcing it.
+Verified 31 Aug 2026 two independent ways: read off the Live dashboard, and
+read out of `$memberstackDom.getApp()` on the live site, which reported
+`mode: "live"` and that exact price ID, £50 GBP, YEARLY, ACTIVE.
+
+The earlier failure that produced the old note (account created, plan never
+attached, Stripe never reached) was real, but the diagnosis was not. The
+cause was elsewhere — most likely Stripe not being connected in Live, or the
+Memberstack account not yet being on a paid plan, since Live Mode needs one.
+If that symptom ever comes back, look at the Stripe connection first, not
+the price ID.
+
+What actually carries over from Test to Live, all confirmed on the live site:
+- the price ID and the plan IDs, unchanged
+- both plans (`BARNA Member — Annual`, `BARNA Member — Manual Access`)
+- the `barna-members-area` Gated Content group, still linked to both plans
+- the `first-name` / `last-name` custom fields
+- the Application ID `app_cmrummrg0005e0su88onb4fmk`
+
+What does **not** carry over: members, and the API keys. Those are the only
+things that genuinely differ between the two modes.
+
+`scripts/swap_price_id.sh` is kept for the day a price genuinely does change
+(a new plan, a price rise). It is not needed for going live.
 - Memberstack script tag is on all pages. Signup is a modal
   (`data-ms-modal="signup"`), never a standalone page.
 - Google/social sign-in was switched off in the Memberstack dashboard
@@ -181,19 +196,26 @@ no admin route to "just set a password" for someone. Consequences:
 - For *test* members only, the workaround is delete + recreate with a
   password in the create call, then PATCH `verified: true`.
 
-### ⚠️ GOING LIVE: the expiry job needs rewiring too
-Test and Live are separate datasets in Memberstack — nothing carries
-over. Green ✅ runs prove nothing if the job is pointed at test data.
-When BARNA goes live:
-1. Recreate the **"BARNA Member — Manual Access"** plan in Live Mode and
-   link it to the **"BARNA - Members area"** Gated Content group (or the
-   gate won't open for legacy members).
-2. Recreate the **`accessexpiresat`** custom field in Live Mode.
-3. Generate a **Live Mode** Admin API key → update the
-   `MEMBERSTACK_SECRET_KEY` repo secret.
-4. Copy the **Live Mode** plan ID → update the `MANUAL_ACCESS_PLAN_ID`
-   repo variable.
-5. Run the workflow manually **with `EXPIRY_CHECK_LIVE_MODE` unset or
+### ⚠️ GOING LIVE: the expiry job still needs its key swapped
+This section also used to say "nothing carries over" and list four things
+to recreate. Mostly wrong, same as the price ID note above. Verified on the
+live site 31 Aug 2026: **the plans and the Gated Content group carry over
+with their IDs intact**, so `MANUAL_ACCESS_PLAN_ID` does not change. The
+Manual Access plan is `pln_barna-member-manual-access-xx8x0ihb` in both
+modes, and it is already linked to the members area group in Live.
+
+What is still true, and still matters:
+1. **Members do not carry over.** Green ✅ runs against test members prove
+   nothing about live ones.
+2. **API keys are per mode.** Generate a **Live Mode** Admin API key and
+   update the `MEMBERSTACK_SECRET_KEY` repo secret. This is the one item
+   from the old list that genuinely has to be done.
+3. Confirm the **`accessexpiresat`** custom field exists in Live before
+   relying on it. `first-name` and `last-name` were confirmed present, and
+   Memberstack's docs say custom fields carry over, but `accessexpiresat`
+   is not exposed in the public app config so it was not verifiable from
+   outside — check it in the dashboard.
+4. Run the workflow manually **with `EXPIRY_CHECK_LIVE_MODE` unset or
    `false` first** and read the dry-run log against real members before
    letting it delete anything.
 
