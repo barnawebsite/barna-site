@@ -225,8 +225,28 @@ Live codes:
 - `BARNA-COMP-9F4TQ2` — 100% off, Forever, capped at 5 redemptions and
   expiring 30 Nov 2026. Comp/testing access. **Deliberately capped and
   dated so a leak cannot become permanent — keep those limits on it.**
-- A 50% student code was planned (`Once` duration, expiring end of academic
-  year) — check Stripe for whether it was actually created.
+- **Student code — NOT created yet (checked 1 Sep 2026).** Confirmed with
+  Mike: only the 100% comp coupon exists in Live. The agreed spec, ready to
+  be entered at Stripe → Products → Coupons → + New:
+
+  | Field | Value |
+  |---|---|
+  | Name (internal) | `BARNA Student 50%` |
+  | Type / amount | Percentage discount, `50` |
+  | Duration | **Once** — matches the site copy, "50% off your first year" |
+  | Customer-facing promotion code | **on**, code `BARNA-STUDENT-7K3PQ9` |
+  | Max redemptions | 50 |
+  | Redeem by | 31 Aug 2027 (end of the 2026/27 academic year) |
+
+  Random suffix on purpose, same as the comp code: it is emailed to each
+  student individually after an ID check, so it never needs to be guessable
+  and a guessable one would leak. Cap and expiry keep a leak finite.
+  50% of £50 is £25, clear of Stripe's £0.01–£1 rejection band.
+
+  Must be created in **Live mode**. Until it exists, the student offer on
+  `index.html` and `members.html` is a promise the checkout cannot keep —
+  both carry an `<!-- EDIT: ... -->` comment saying exactly that, to be
+  removed once the code is live.
 
 If the student rate becomes permanent, a separate £25 student *plan* is
 cleaner than a code: nothing to leak, and the count is visible.

@@ -735,7 +735,9 @@ the list because a bulk onboarding is exactly when spam-foldering hurts.
   screenshot on 1 Sep 2026 and deliberately kept for now to avoid
   reconfiguring Outlook mid-setup. Changing it means updating the IMAP and
   SMTP passwords in Outlook at the same time.
-- 50% student discount code in Stripe, if still wanted.
+- 50% student discount code in Stripe — still outstanding, confirmed not
+  created as of 1 Sep 2026. Exact spec is in `CLAUDE.md` under "Discount
+  codes live in Stripe"; must be entered in **Live** mode.
 - Update the `MEMBERSTACK_SECRET_KEY` repo secret with a **Live** Admin API
   key. `MANUAL_ACCESS_PLAN_ID` does *not* change — verified identical in
   both modes.
