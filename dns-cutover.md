@@ -665,6 +665,10 @@ the list because a bulk onboarding is exactly when spam-foldering hurts.
 - Retire the old Weebly site.
 
 **Small, independent:**
+- Rotate the `info@barna.co.uk` mailbox password. It was exposed in a
+  screenshot on 1 Sep 2026 and deliberately kept for now to avoid
+  reconfiguring Outlook mid-setup. Changing it means updating the IMAP and
+  SMTP passwords in Outlook at the same time.
 - 50% student discount code in Stripe, if still wanted.
 - Update the `MEMBERSTACK_SECRET_KEY` repo secret with a **Live** Admin API
   key. `MANUAL_ACCESS_PLAN_ID` does *not* change — verified identical in

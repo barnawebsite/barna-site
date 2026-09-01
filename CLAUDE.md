@@ -207,7 +207,18 @@ each with an exact cutoff date instead of a fresh 12-month term (their
 call, not ours — no free extra months). Since Memberstack can't enforce
 that date itself, we built it:
 - Each such member gets a custom field `accessexpiresat` (format
-  `DD/MM/YYYY`) set to their real expiry date.
+  `DD/MM/YYYY`) set to their real expiry date. The literal value `never`
+  means open-ended access and is skipped by the job — used for the 11 board
+  members, who keep access until someone removes them by hand. Anything
+  else, including blank, lands in the job's "NEEDS MANUAL CHECK" list and
+  is never removed automatically.
+- Onboarding the legacy members is two scripts, both dry run by default:
+  `scripts/prepare_member_import.py` turns a CSV export of Mike's member
+  spreadsheet into a flat import file, and `scripts/import_legacy_members.py`
+  creates the accounts and attaches the plan. The import matches on email
+  against the existing member list, so re-running it repairs rather than
+  duplicates. **The member list itself must never be committed** — the repo
+  is public; `_member-list/` and `*member*import*.csv` are gitignored.
 - `.github/workflows/member-expiry-check.yml` runs
   `scripts/check_member_expiry.py` daily (07:00 UTC + manual
   `workflow_dispatch`). It only ever looks at members on the Manual
