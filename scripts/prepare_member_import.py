@@ -96,6 +96,18 @@ def plus_twelve_months(d):
         return d.replace(year=d.year + 1, day=28)
 
 
+def tidy_name(name):
+    """Fix names typed in block capitals, leaving everything else alone.
+
+    Four rows in the sheet are shouted, which would produce "Dear JANE" in a
+    mail merge. Only fully-uppercase words are touched, so McNeill, O'Brien
+    and double-barrelled names keep their own capitalisation.
+    """
+    def fix(word):
+        return word.capitalize() if word.isupper() and len(word) > 1 else word
+    return " ".join(fix(w) for w in name.split())
+
+
 def find_columns(header):
     """Map our logical column names onto the sheet's actual header row."""
     normalised = [h.strip().lower() for h in header]
@@ -146,7 +158,8 @@ def main():
             i = col[key]
             return row[i].strip() if i is not None and i < len(row) else ""
 
-        email, first, last = cell("email"), cell("first"), cell("last")
+        email = cell("email")
+        first, last = tidy_name(cell("first")), tidy_name(cell("last"))
         legacy_id = f"sheet-row-{sheet_row}"
 
         if not any((email, first, last)):
