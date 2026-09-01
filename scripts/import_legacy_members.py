@@ -299,6 +299,10 @@ def main():
     ap.add_argument("source", help="CSV from prepare_member_import.py")
     ap.add_argument("--limit", type=int,
                     help="only process the first N importable rows (test batch)")
+    ap.add_argument("--only",
+                    help="comma-separated emails: process just these rows. Use "
+                         "this for the first live run so it touches only an "
+                         "address you control.")
     ap.add_argument("--log", default="_member-list/import-log.csv",
                     help="where to write the per-member result")
     ap.add_argument("--no-verify", action="store_true",
@@ -316,6 +320,18 @@ def main():
     skipped = [r for r in rows if r["skip"].strip()]
     todo = [r for r in rows if not r["skip"].strip()]
     validate(todo)
+
+    if args.only:
+        wanted = {e.strip().lower() for e in args.only.split(",") if e.strip()}
+        todo = [r for r in todo if r["email"].strip().lower() in wanted]
+        found = {r["email"].strip().lower() for r in todo}
+        for missing in sorted(wanted - found):
+            print(f"  NOTE: {missing} is not an importable row in this file "
+                  f"(held back, or not in the sheet)")
+        if not todo:
+            sys.exit("\nERROR: --only matched nothing, so there is nothing to "
+                     "do.\n\n  Nothing was changed in Memberstack.\n")
+
     if args.limit:
         todo = todo[:args.limit]
 
