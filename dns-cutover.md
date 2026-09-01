@@ -166,6 +166,14 @@ becomes the 20i account login (section 11). Mail for barna.co.uk already
 points at `mx.stackmail.com`, which is 20i's own mail platform, so the
 mailbox belongs there and **no MX change is needed to create it**.
 
+#### DONE 1 Sep 2026 — and no hosting package was needed
+
+`info@barna.co.uk` was created this way: Standard mailbox, 10 GB, zero
+bytes used. **Confirmed in practice that 20i charges nothing extra and
+asks for no package.** The panel warns that a new mailbox can take up to
+30 minutes to start receiving, so a failed test straight after creating it
+means wait, not broken.
+
 #### ⚠️ Do NOT buy a hosting package for this
 
 20i bundles mailboxes with hosting, so the obvious read of their pricing
@@ -557,7 +565,8 @@ members area, and full control of registrant, registrar and DNS.
 
 **Agreed order (1 Sep 2026), Mike's call:**
 
-1. **Create `info@barna.co.uk`** at 20i, then set it as Memberstack's
+1. **`info@barna.co.uk` created 1 Sep 2026** ✅ — free, no hosting package
+   needed. Still to do: set it as Memberstack's
    sender (**Settings → Email Sender Address**). Reordered ahead of the
    members on 1 Sep 2026: onboarding 91 people is the one job where mail
    landing in spam is expensive, and DNS is now in hand so there is no
