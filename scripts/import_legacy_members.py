@@ -374,8 +374,7 @@ def main():
                 if not args.no_verify and member_id:
                     mark_verified(member_id)
                 if member_id:
-                    created_ids.append(
-                        (member_id, email, row["access_expires_at"]))
+                    created_ids.append((member_id, email, custom_fields(row)))
             else:
                 member_id = member["id"]
                 if not has_active_plan(member):
@@ -405,24 +404,29 @@ def main():
         for member_id, email, wanted in sample:
             try:
                 fields = read_back(member_id).get("customFields") or {}
-                actual = fields.get(FIELD_EXPIRY)
-                if actual != wanted:
-                    mismatched.append((email, wanted, actual))
-                else:
-                    print(f"  ok  {email}  {FIELD_EXPIRY}={actual}")
+                for field, value in wanted.items():
+                    actual = fields.get(field)
+                    if actual != value:
+                        mismatched.append((email, field, value, actual))
+                if not any(mm[0] == email for mm in mismatched):
+                    print(f"  ok  {email}  "
+                          + ", ".join(f"{k}={fields.get(k)!r}"
+                                      for k in wanted))
             except Exception as exc:
-                mismatched.append((email, wanted, f"could not read back: {exc}"))
+                mismatched.append((email, "all", "readable member",
+                                   f"could not read back: {exc}"))
         if mismatched:
             print()
-            print("  *** STOP. The expiry date did not save. ***")
-            for email, wanted, actual in mismatched:
-                print(f"  {email}: expected {wanted!r}, got {actual!r}")
+            print("  *** STOP. Some fields did not save. ***")
+            for email, field, wanted, actual in mismatched:
+                print(f"  {email}: {field} expected {wanted!r}, got {actual!r}")
             print()
-            print(f"  The '{FIELD_EXPIRY}' custom field almost certainly does not")
-            print( "  exist in this Memberstack app. Add it under Members ->")
-            print( "  Custom Fields, then re-run: the import matches on email,")
-            print( "  so it will repair these rather than duplicate them.")
-            print( "  Until it is fixed, nobody's access will ever expire.")
+            print( "  A custom field that does not exist in this Memberstack app")
+            print( "  is accepted and silently dropped. Check the field names")
+            print( "  under Members -> Custom Fields, then re-run: the import")
+            print( "  matches on email, so it repairs rather than duplicates.")
+            print(f"  If it is '{FIELD_EXPIRY}' that is missing, nobody's access")
+            print( "  will ever expire until it is fixed.")
             sys.exit(1)
 
     print()
