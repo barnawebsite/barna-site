@@ -115,6 +115,11 @@ def main():
     ap.add_argument("source", help="CSV export of the member spreadsheet")
     ap.add_argument("--out", default="_member-list/members-import.csv")
     ap.add_argument("--today", help="override today's date, YYYY-MM-DD (for testing)")
+    ap.add_argument("--include-flagged", action="store_true",
+                    help="import the flagged rows too, instead of holding them "
+                         "back for a decision")
+    ap.add_argument("--held", default="_member-list/held-back.txt",
+                    help="where to write the readable list of held-back people")
     args = ap.parse_args()
 
     today = (datetime.date.fromisoformat(args.today) if args.today
@@ -212,6 +217,34 @@ def main():
         out_rows.append([email, first, last, stamp, legacy_id, "",
                          "; ".join(review)])
 
+    # Anything with a review note is held back rather than imported: Mike's
+    # call, 1 Sep 2026, get the unambiguous ones in and add the rest by hand
+    # later. The skip column is what import_legacy_members.py honours.
+    held = []
+    if not args.include_flagged:
+        for row in out_rows:
+            note = row[6]
+            if note:
+                row[5] = "held back, see review_note"
+                held.append(row)
+
+    if held:
+        held_dir = os.path.dirname(args.held)
+        if held_dir:
+            os.makedirs(held_dir, exist_ok=True)
+        with open(args.held, "w", encoding="utf-8") as fh:
+            fh.write("BARNA legacy members held back from the import\n")
+            fh.write(f"Generated {today.isoformat()}. "
+                     f"{len(held)} people, none of them created in Memberstack.\n")
+            fh.write("Add them by hand, or re-run the prepare script with "
+                     "--include-flagged once each one is settled.\n\n")
+            for email, first, last, expiry, legacy_id, _skip, note in held:
+                fh.write(f"{first} {last}\n")
+                fh.write(f"    email    {email}\n")
+                fh.write(f"    expiry   {expiry or '(none)'}\n")
+                fh.write(f"    {legacy_id}\n")
+                fh.write(f"    why      {note}\n\n")
+
     out_dir = os.path.dirname(args.out)
     if out_dir:
         os.makedirs(out_dir, exist_ok=True)
@@ -222,9 +255,14 @@ def main():
 
     print(f"Read {len(rows) - 1} sheet rows, wrote {len(out_rows)} to {args.out}")
     print()
-    print(f"  live, with a future expiry date      : {counts['import']}")
-    print(f"  board members, no expiry ('never')   : {counts['board']}")
-    print(f"  of the above, lapsed + grace year    : {counts['grace']}")
+    importing = len(out_rows) - len(held)
+    print(f"  WILL BE IMPORTED                     : {importing}")
+    print(f"  held back for a decision             : {len(held)}")
+    print()
+    print(f"  (of the whole file: {counts['import']} dated, "
+          f"{counts['board']} board on 'never', {counts['grace']} lapsed)")
+    if held:
+        print(f"  Held-back list written to {args.held}")
     print()
     if info:
         print(f"FOR INFORMATION ({len(info)}):")
