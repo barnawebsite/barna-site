@@ -212,6 +212,12 @@ that date itself, we built it:
   members, who keep access until someone removes them by hand. Anything
   else, including blank, lands in the job's "NEEDS MANUAL CHECK" list and
   is never removed automatically.
+- **Four of the 91 had already lapsed by onboarding day.** Mike's call
+  (1 Sep 2026): give those a grace year rather than create them and have the
+  expiry job strip access the next morning, and let whoever handles
+  membership cancel them if they never renew. This is the one deliberate
+  exception to "no free extra months" above; those rows are marked CANCEL in
+  the import file's `review_note` column.
 - Onboarding the legacy members is two scripts, both dry run by default:
   `scripts/prepare_member_import.py` turns a CSV export of Mike's member
   spreadsheet into a flat import file, and `scripts/import_legacy_members.py`

@@ -10,9 +10,12 @@ The rules it applies, all agreed with Mike 1 Sep 2026:
   - expiry = "Last Renewal Date" + 12 months
   - board members get no expiry date at all (the literal string "never"),
     keeping access until someone removes them by hand
-  - everyone is imported, including anyone already past their date (Mike's
-    call, 1 Sep 2026: the membership secretary reconciles the edge cases in
-    Memberstack afterwards). Those rows carry a review_note instead.
+  - everyone is imported. Anyone already past their date gets a grace year
+    on top rather than being created and stripped by the expiry job the next
+    morning (Mike's call, 1 Sep 2026); the membership secretary cancels them
+    later if they never renew. This is the one deliberate exception to the
+    "no free extra months" rule in CLAUDE.md, and those rows carry a
+    review_note saying so.
 
 Nothing here touches Memberstack. It only reads a file and writes a file.
 
@@ -124,7 +127,9 @@ def main():
 
     col = find_columns(rows[0])
     out_rows, notes, seen_emails = [], [], {}
-    counts = {"board": 0, "import": 0, "expired": 0}
+    counts = {"board": 0, "import": 0, "grace": 0}
+
+    info = []
 
     def flag(sheet_row, email, why):
         notes.append((sheet_row, email, why))
@@ -146,9 +151,13 @@ def main():
         is_board = board_cell.lower() == "board member"
         review = []
         if board_cell and not is_board:
-            review.append(flag(sheet_row, email,
-                               f"unrecognised value {board_cell!r} in the board "
-                               f"column, treated as NOT a board member"))
+            # Only "Board Member" counts. The sheet has one stray number in
+            # this column, confirmed with Mike 1 Sep 2026 as a normal member,
+            # so this is worth printing but is not a job for the membership
+            # secretary and stays out of review_note.
+            info.append((sheet_row, email,
+                         f"ignored value {board_cell!r} in the board column, "
+                         f"treated as NOT a board member"))
 
         if not EMAIL_RE.match(email):
             review.append(flag(sheet_row, email, "email does not look valid"))
@@ -175,19 +184,31 @@ def main():
             continue
 
         expires = plus_twelve_months(renewed)
+
+        # A term that is already up, or up today, would mean a welcome email
+        # followed by the expiry job pulling access at the next 07:00 run. Add
+        # a grace year instead and let the membership secretary cancel them if
+        # they never renew.
+        if expires <= today:
+            lapsed = expires
+            expires = plus_twelve_months(expires)
+            counts["grace"] += 1
+            review.append(flag(
+                sheet_row, email,
+                f"lapsed {lapsed.strftime('%d/%m/%Y')}, given a grace year to "
+                f"{expires.strftime('%d/%m/%Y')}. CANCEL if they do not renew"))
+            if expires <= today:
+                review.append(flag(sheet_row, email,
+                                   "STILL not in the future even with the "
+                                   "grace year, needs a date by hand"))
+
         stamp = expires.strftime("%d/%m/%Y")
         days = (expires - today).days
-        if days < 0:
-            counts["expired"] += 1
+        counts["import"] += 1
+        if 0 <= days <= 45:
             review.append(flag(sheet_row, email,
-                               f"ALREADY EXPIRED {stamp}, the daily job will "
-                               f"remove access at the next 07:00 run"))
-        else:
-            counts["import"] += 1
-            if days <= 45:
-                review.append(flag(sheet_row, email,
-                                   f"expires {stamp}, only {days} days after "
-                                   f"onboarding"))
+                               f"expires {stamp}, only {days} days after "
+                               f"onboarding"))
         out_rows.append([email, first, last, stamp, legacy_id, "",
                          "; ".join(review)])
 
@@ -203,8 +224,14 @@ def main():
     print()
     print(f"  live, with a future expiry date      : {counts['import']}")
     print(f"  board members, no expiry ('never')   : {counts['board']}")
-    print(f"  imported but already expired         : {counts['expired']}")
+    print(f"  of the above, lapsed + grace year    : {counts['grace']}")
     print()
+    if info:
+        print(f"FOR INFORMATION ({len(info)}):")
+        for sheet_row, email, why in info:
+            print(f"  sheet row {sheet_row:>3}  {email:<38} {why}")
+        print()
+
     if notes:
         print(f"NEEDS A HUMAN LOOK ({len(notes)}):")
         for sheet_row, email, why in notes:
