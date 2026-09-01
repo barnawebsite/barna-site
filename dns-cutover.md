@@ -481,25 +481,29 @@ members area, and full control of registrant, registrar and DNS.
 
 **Agreed order (1 Sep 2026), Mike's call:**
 
-1. **Onboard the ~91 legacy members** onto the Manual Access plan, each with
-   an `accessexpiresat` date. See the expiry section in `CLAUDE.md`.
-2. **Move the money off personal details.** Three separate places, all
+1. **Create `info@barna.co.uk`** at 20i, then set it as Memberstack's
+   sender (**Settings → Email Sender Address**). Reordered ahead of the
+   members on 1 Sep 2026: onboarding 91 people is the one job where mail
+   landing in spam is expensive, and DNS is now in hand so there is no
+   reason to wait. Memberstack will give one MX and two TXT records.
+   ⚠️ **The existing `mx.stackmail.com` MX must survive** — see section 2.
+2. **Onboard the ~91 legacy members** onto the Manual Access plan, each with
+   an `accessexpiresat` date. See the expiry section in `CLAUDE.md`. Note
+   the Admin API cannot set a password on an existing member, so every one
+   of them sets their own via a reset email. Send a test batch of five
+   before doing all 91.
+3. **Move the money off personal details.** Three separate places, all
    currently pointing at an individual:
    - **Stripe**: membership payments land in Mike's personal bank account.
      Swap to BARNA's account and sort code. Most urgent of the three, since
      it is charity income going to a trustee.
    - **Memberstack**: the £11/month subscription is on a personal card.
    - **20i**: the domain renewal card, and the account's only login email.
-3. **Create `info@barna.co.uk`.** Now possible: DNS is under BARNA's control
-   at 20i, and 20i does mailboxes.
-4. Then the Memberstack custom sender and its DKIM records (section 4).
+     Once `info@barna.co.uk` exists, move the login to it.
 
-⚠️ Note on the order of 1 and 3. Memberstack's default sender
-(`no-reply@memberstack.io`) works, so the legacy members *can* be onboarded
-before the mailbox exists. But Memberstack has a known issue with
-verification and welcome mail landing in spam, and 91 undelivered password
-resets becomes 91 support emails. Doing step 3 first is cheap now that DNS
-is in hand. Flagged, and Mike has chosen members first.
+Note: Memberstack's default sender (`no-reply@memberstack.io`) does work, so
+the mailbox is about deliverability rather than possibility. It is first in
+the list because a bulk onboarding is exactly when spam-foldering hurts.
 
 **Also outstanding:**
 - Memberstack custom email sender + its DKIM records (section 4).
