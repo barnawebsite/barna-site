@@ -27,6 +27,23 @@ developer, but is comfortable pasting/editing HTML directly.
   TBD copy) that still needs a real value — search for these before
   considering a page "done."
 
+### Links: new tab or same tab (Mike's rule, Sep 2026)
+Anything that leaves the site or downloads a file opens in a new tab, so
+people don't lose their place: **every** external `http(s)` link and every
+document link (`.pdf`, `.docx`, …) gets `target="_blank" rel="noopener"`.
+Add both whenever you add such a link.
+
+Everything else deliberately stays in the same tab, confirmed with Mike:
+- links to BARNA's own pages, including the nav — a tab per nav click piles
+  up tabs and breaks the Back button, and you can't "lose" the site by
+  moving around inside it
+- `data-ms-modal` triggers (Join, Log In) — these open a Memberstack modal
+  over the current page; a new tab breaks signup and login outright
+- `mailto:` links — they hand off to the mail app without navigating
+
+`rel="noopener"` matters on its own: without it the opened page can reach
+back into the tab that opened it.
+
 ## Navigation (deliberately kept short)
 Home · About · Affiliations & Partners · Education & Clinical Practice ·
 Paediatric Care · Members Area
