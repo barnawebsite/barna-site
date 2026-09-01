@@ -157,6 +157,21 @@ values:
 | On Login | `/members.html` |
 | On Logout | `/` |
 
+**The same stale host bit the emails too, found 1 Sep 2026.** Memberstack
+builds the links in its own transactional email (verify address, password
+reset) from the app's configured domain, which was still
+`barnawebsite.github.io`. That host 404s: only `/barna-site/` was ever
+published there, and it now 301s to `barna.co.uk`, while the bare host has
+nothing. So every emailed link was dead. Set the domain to `barna.co.uk` in
+the Memberstack dashboard. This matters far more than it looks, because the
+legacy-member onboarding depends entirely on password reset links working.
+
+Memberstack also sends a verification email the moment a member is created,
+including one created through the Admin API. `CreateMember` has no `verified`
+parameter, so the import's PATCH to `verified: true` lands *after* that mail
+has already gone. For a bulk onboarding of people who are already known
+members, turn email verification off in the dashboard first.
+
 Note `/members` also resolves — GitHub Pages maps it to `members.html` — but
 `/account`, `/profile`, `/dashboard` and `/join` all 404, so don't invent
 extensionless paths. This is plain static hosting with no routing.
@@ -298,11 +313,11 @@ What is still true, and still matters:
 2. **API keys are per mode.** Generate a **Live Mode** Admin API key and
    update the `MEMBERSTACK_SECRET_KEY` repo secret. This is the one item
    from the old list that genuinely has to be done.
-3. Confirm the **`accessexpiresat`** custom field exists in Live before
-   relying on it. `first-name` and `last-name` were confirmed present, and
-   Memberstack's docs say custom fields carry over, but `accessexpiresat`
-   is not exposed in the public app config so it was not verifiable from
-   outside — check it in the dashboard.
+3. ~~Confirm the **`accessexpiresat`** custom field exists in Live.~~ Done,
+   1 Sep 2026: it saves and reads back correctly on a real live member, and
+   shows as a column in the dashboard. Note it does *not* appear in
+   `getApp().customFields`, which lists only dashboard-defined form fields,
+   so its absence there is not evidence of a problem.
 4. Run the workflow manually **with `EXPIRY_CHECK_LIVE_MODE` unset or
    `false` first** and read the dry-run log against real members before
    letting it delete anything.
