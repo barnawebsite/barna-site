@@ -158,27 +158,84 @@ root.
 Memberstack will not send from a free domain like gmail. It needs a
 sender address on barna.co.uk plus DNS records proving we own it.
 
-**The exact values are generated per account and cannot be written down
-in advance.** Get them at the time: Memberstack → Emails → Add
-transactional sender → enter the address (e.g. `info@barna.co.uk`) → it
-will display the records to add.
+### 4a. Create the mailbox first, at 20i
 
-Expect roughly:
-- **2–3 CNAME records** for DKIM, with names like `s1._domainkey`,
-  pointing at Memberstack's mail provider. Add these exactly as given.
-- **Possibly an SPF change.** If they ask for an `include:`, merge it
-  into the existing SPF record rather than creating a second one:
+The sender must be a **real mailbox**, not a forwarder — Memberstack will
+not let an address be used until it is reachable, and this same address
+becomes the 20i account login (section 11). Mail for barna.co.uk already
+points at `mx.stackmail.com`, which is 20i's own mail platform, so the
+mailbox belongs there and **no MX change is needed to create it**.
 
-  ```
-  v=spf1 include:spf.stackmail.com include:THEIR-VALUE-HERE a mx ~all
-  ```
+20i control panel → **Email** → the barna.co.uk domain → **Add Mailbox**
+→ `info` → set a password → save. Then log into webmail once
+(`https://webmail.stackmail.com`) and confirm a test message from an
+outside address arrives.
 
-A real mailbox is needed for the sender address, not just a forwarder,
-since it has to receive the verification email. Role addresses for
-everyone else (`treasurer@`, `membership@`, `chair@`) can be free
-forwarders pointing at personal inboxes, which is the right pattern —
-when someone steps down you change the forward instead of hunting for
-logins.
+Role addresses for everyone else (`treasurer@`, `membership@`, `chair@`)
+should be free **forwarders** pointing at personal inboxes, not mailboxes
+— when someone steps down you change the forward instead of hunting for
+logins. `info@` is the exception because it has to receive.
+
+### 4b. Point Memberstack at it
+
+Memberstack → **Settings → Email Sender Address** → enter
+`info@barna.co.uk`. It shows **one MX and two TXT** records, then a
+**Verify** button in the same modal — the values are generated per account
+so they must be read at the time, but the *shape* is now known.
+
+Memberstack sends through **Resend**, and Resend puts its records on a
+`send` subdomain rather than the apex:
+
+| Type | Name | Value | Priority |
+|---|---|---|---|
+| MX | `send` | `feedback-smtp.<region>.amazonses.com` | 10 |
+| TXT | `send` | `v=spf1 include:amazonses.com ~all` | — |
+| TXT | `resend._domainkey` | `p=<long key>` | — |
+
+### ⚠️ Two worries this resolves, and one that remains
+
+**The MX is not a conflict.** Earlier notes warned that Memberstack asking
+for an MX threatened the existing `mx.stackmail.com`. It does not: Resend's
+MX is on `send.barna.co.uk`, a different name entirely. The apex MX stays
+exactly as it is. **Do not touch the apex MX**, and if Memberstack ever
+displays an MX whose Name is `@` or blank, stop and check before saving —
+that would break mail.
+
+**No SPF merge is needed either.** Resend's `v=spf1 include:amazonses.com`
+also lives on `send`, not the apex, so the existing apex record
+`v=spf1 include:spf.stackmail.com a mx ~all` is untouched. The "only ever
+one SPF record" rule in section 2 still holds — it applies per name, and
+these are two different names, each with one record.
+
+**What does still apply: 20i's Name field.** Enter `send` and
+`resend._domainkey` on their own — 20i appends the domain automatically,
+so typing `send.barna.co.uk` produces `send.barna.co.uk.barna.co.uk` and
+silently does nothing (section 10). Subdomain entries behave correctly,
+which is why this job avoids the apex pain that the A records hit.
+
+Resend also tells you to **omit the domain from pasted values**. That is
+advice for the Name field, not the value field — paste MX and DKIM
+*values* exactly as given, in full.
+
+Propagation can take up to 24 hours, though 20i is usually minutes. Click
+Verify in Memberstack after the records resolve, not before.
+
+### 4c. Check it
+
+```
+dig +short MX  barna.co.uk            # must still be 10 mx.stackmail.com
+dig +short TXT barna.co.uk            # must still be the stackmail SPF, one record
+dig +short MX  send.barna.co.uk       # the new Resend feedback MX
+dig +short TXT send.barna.co.uk       # v=spf1 include:amazonses.com ~all
+dig +short TXT resend._domainkey.barna.co.uk
+```
+
+The first two lines are the safety check: if either changed, mail for the
+domain is at risk and the apex records need putting back.
+
+Finally, trigger a real password reset from the live site and confirm it
+arrives from `info@barna.co.uk` and lands in the inbox rather than spam.
+That, not the green tick in Memberstack, is what the whole exercise is for.
 
 ---
 
@@ -486,7 +543,9 @@ members area, and full control of registrant, registrar and DNS.
    members on 1 Sep 2026: onboarding 91 people is the one job where mail
    landing in spam is expensive, and DNS is now in hand so there is no
    reason to wait. Memberstack will give one MX and two TXT records.
-   ⚠️ **The existing `mx.stackmail.com` MX must survive** — see section 2.
+   The MX turns out **not** to threaten the existing `mx.stackmail.com`:
+   Resend puts it on `send.barna.co.uk`, not the apex. Section 4 has the
+   full record shape and the safety checks.
 2. **Onboard the ~91 legacy members** onto the Manual Access plan, each with
    an `accessexpiresat` date. See the expiry section in `CLAUDE.md`. Note
    the Admin API cannot set a password on an existing member, so every one

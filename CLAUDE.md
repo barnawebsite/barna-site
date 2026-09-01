@@ -255,10 +255,11 @@ no admin route to "just set a password" for someone. Consequences:
   quality decision, not a prerequisite. It buys mail from `@barna.co.uk`
   and better deliverability. It needs **one MX and two TXT records**, so it
   still waits on DNS control, i.e. the registrar move off SYPO.
-  ⚠️ Memberstack uses Resend and asks for an **MX record** — the existing
-  `mx.stackmail.com` MX must survive. Resend normally puts its MX on a
-  subdomain, but verify at the time rather than assuming. See the "Do not
-  break email" section of `dns-cutover.md`.
+  Memberstack uses Resend, which asks for an **MX record** — but on the
+  `send.` subdomain, not the apex, so the existing `mx.stackmail.com` MX
+  and the apex SPF are both untouched and no SPF merge is needed
+  (confirmed 1 Sep 2026). Section 4 of `dns-cutover.md` has the exact
+  records and the dig checks that prove mail still works.
 - Judgement call for the 91: sending from `memberstack.io` works, but
   Memberstack has a known issue with verification and welcome mail landing
   in spam. For a one-off bulk onboarding of 91 people, set up the custom
