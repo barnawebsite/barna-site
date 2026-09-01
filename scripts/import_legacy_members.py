@@ -156,6 +156,20 @@ def update_custom_fields(member_id, fields):
     return api("PATCH", f"/members/{member_id}", {"customFields": fields})
 
 
+def read_back(member_id):
+    """Re-read a member straight after creating them.
+
+    The Admin API accepts a password on update and silently ignores it
+    (see the module docstring), so "200 OK" is not proof a field landed. If
+    the accessexpiresat custom field does not exist in this Memberstack app,
+    the create would succeed with the date quietly dropped, and the expiry
+    job would then never revoke anyone. Reading one back is the only way to
+    know it actually stuck.
+    """
+    got = api("GET", f"/members/{member_id}")
+    return got.get("data", got)
+
+
 def mark_verified(member_id):
     """Mark the email address as already verified.
 
@@ -271,7 +285,7 @@ def main():
     print(f"Members already in Memberstack: {len(existing)}")
     print()
 
-    results, failures = [], 0
+    results, failures, created_ids = [], 0, []
     for row in todo:
         email = row["email"].strip()
         member = existing.get(email.lower())
@@ -294,6 +308,9 @@ def main():
                 member_id = created.get("data", created).get("id", "")
                 if not args.no_verify and member_id:
                     mark_verified(member_id)
+                if member_id:
+                    created_ids.append(
+                        (member_id, email, row["access_expires_at"]))
             else:
                 member_id = member["id"]
                 if not has_active_plan(member):
@@ -314,6 +331,34 @@ def main():
         writer = csv.writer(fh)
         writer.writerow(["email", "legacy_id", "result", "detail"])
         writer.writerows(results)
+
+    if LIVE and created_ids:
+        print()
+        print("Checking the custom fields actually saved...")
+        sample = created_ids[:5]
+        mismatched = []
+        for member_id, email, wanted in sample:
+            try:
+                fields = read_back(member_id).get("customFields") or {}
+                actual = fields.get(FIELD_EXPIRY)
+                if actual != wanted:
+                    mismatched.append((email, wanted, actual))
+                else:
+                    print(f"  ok  {email}  {FIELD_EXPIRY}={actual}")
+            except Exception as exc:
+                mismatched.append((email, wanted, f"could not read back: {exc}"))
+        if mismatched:
+            print()
+            print("  *** STOP. The expiry date did not save. ***")
+            for email, wanted, actual in mismatched:
+                print(f"  {email}: expected {wanted!r}, got {actual!r}")
+            print()
+            print(f"  The '{FIELD_EXPIRY}' custom field almost certainly does not")
+            print( "  exist in this Memberstack app. Add it under Members ->")
+            print( "  Custom Fields, then re-run: the import matches on email,")
+            print( "  so it will repair these rather than duplicate them.")
+            print( "  Until it is fixed, nobody's access will ever expire.")
+            sys.exit(1)
 
     print()
     print(f"Wrote {args.log}")
