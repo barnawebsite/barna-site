@@ -195,6 +195,28 @@ and confirm a test message from an outside address arrives.
 If a second mailbox is ever genuinely needed, that is the point at which a
 package becomes the honest answer — not before.
 
+#### Creating the mailbox adds four CNAMEs — leave them alone
+
+20i silently wrote these into the zone at the same time. They are mail
+client autodiscovery records, not cruft, and they are **not** in the
+original zone list further down this document because they did not exist
+when it was written:
+
+```
+CNAME  imap    imap.stackmail.com.
+CNAME  mail    mail.stackmail.com.
+CNAME  pop3    pop3.stackmail.com.
+CNAME  smtp    smtp.stackmail.com.
+```
+
+They are harmless to the website — only the apex A records and `www`
+matter to GitHub Pages — and they do not collide with the `send`
+subdomain Memberstack needs. Do not remove them while tidying.
+
+Zone verified 1 Sep 2026 after the mailbox was created: four GitHub A
+records, `www` CNAME, apex MX and one apex SPF all unchanged, no wildcard
+`*` record, and `https://barna.co.uk` still 200.
+
 Role addresses for everyone else (`treasurer@`, `membership@`, `chair@`)
 should be free **forwarders** pointing at personal inboxes, not mailboxes
 — when someone steps down you change the forward instead of hunting for
