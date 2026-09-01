@@ -67,12 +67,57 @@ def require_env(name, where, example=""):
 
 
 API_KEY = require_env("MEMBERSTACK_SECRET_KEY", "Secrets")
-if "paste" in API_KEY.lower() or "here" in API_KEY.lower():
+
+
+def key_shape(key):
+    """Describe the key without revealing it: prefix and length only.
+
+    Memberstack shows three similar-looking values on adjacent screens and
+    they are easy to mix up, so this says which one was supplied without
+    printing anything usable.
+    """
+    prefix = key.split("_")[0] + "_" if "_" in key else key[:3]
+    return f"starts with {prefix!r} and is {len(key)} characters long"
+
+
+# Catch the three easy mix-ups before spending a network call on them.
+_WRONG_KEY = {
+    "paste": "still the placeholder text from the instructions, not a real key",
+    "app_": "the Application ID. That one is public and is already in the HTML "
+            "of every page on the site. It cannot authenticate anything",
+    "pk_": "the PUBLIC key. That is the one that goes in the website's script "
+           "tag. It cannot be used to read or change members",
+}
+for marker, what in _WRONG_KEY.items():
+    if API_KEY.lower().startswith(marker) or marker == "paste" and "paste" in API_KEY.lower():
+        sys.exit(
+            f"\nERROR: that is {what}.\n\n"
+            f"  The key supplied {key_shape(API_KEY)}.\n\n"
+            f"  You want the SECRET key, which starts with 'sk_':\n"
+            f"    Memberstack -> Settings -> API keys -> Secret key,\n"
+            f"    with the Test/Live toggle set to LIVE.\n\n"
+            f"  Nothing was changed in Memberstack.\n"
+        )
+
+if API_KEY.startswith("sk_sb_"):
     sys.exit(
-        "\nERROR: MEMBERSTACK_SECRET_KEY is still the placeholder text, not a real key.\n\n"
-        "  Get one from Memberstack -> Settings -> API keys, in LIVE mode.\n"
-        "  A real key starts with 'sk_'.\n\n"
+        "\nERROR: that is the TEST secret key, not the Live one.\n\n"
+        "  The 'sb' after 'sk_' means sandbox. Test and Live are separate\n"
+        "  Memberstack environments with separate keys and separate members,\n"
+        "  and a Test key cannot see or change any live member.\n\n"
+        "  Flip the Test/Live toggle in the dashboard to LIVE, then take the\n"
+        "  Secret key from Settings -> API keys. It will not have 'sb' in it.\n\n"
         "  Nothing was changed in Memberstack.\n"
+    )
+
+if not API_KEY.startswith("sk_"):
+    sys.exit(
+        f"\nERROR: that does not look like a Memberstack secret key.\n\n"
+        f"  The key supplied {key_shape(API_KEY)}, but a secret key\n"
+        f"  starts with 'sk_'.\n\n"
+        f"  Memberstack -> Settings -> API keys -> Secret key, with the\n"
+        f"  Test/Live toggle set to LIVE.\n\n"
+        f"  Nothing was changed in Memberstack.\n"
     )
 PLAN_ID = require_env(
     "MANUAL_ACCESS_PLAN_ID", "Variables", "pln_barna-member-manual-access-xx8x0ihb"
@@ -227,9 +272,13 @@ def validate(rows):
 FRIENDLY_ERRORS = {
     "validation/invalid-secret-key":
         "Memberstack rejected the API key.\n"
-        "  - Check it is copied whole, including the 'sk_' at the front.\n"
-        "  - Check it is the LIVE key, not the Test one. They are different,\n"
-        "    and a test key will not see any live members.",
+        f"  The key supplied {key_shape(API_KEY)}.\n"
+        "  - Check it is the LIVE key, not the Test one. They are separate\n"
+        "    keys, and a Test key is rejected outright against live data.\n"
+        "  - Check nothing was cut off when copying. Use the copy button in\n"
+        "    the dashboard rather than selecting the text by hand.\n"
+        "  - If Memberstack has no Live secret key to show you, the account\n"
+        "    may not be on a paid plan yet, which Live Mode requires.",
     "validation/plan-not-found":
         "Memberstack does not recognise MANUAL_ACCESS_PLAN_ID.\n"
         "  It should be pln_barna-member-manual-access-xx8x0ihb.",
