@@ -479,7 +479,29 @@ discount codes, gated members area.
 **Done:** domain, HTTPS, Memberstack live, payments, discount codes, gated
 members area, and full control of registrant, registrar and DNS.
 
-**Next:**
+**Agreed order (1 Sep 2026), Mike's call:**
+
+1. **Onboard the ~91 legacy members** onto the Manual Access plan, each with
+   an `accessexpiresat` date. See the expiry section in `CLAUDE.md`.
+2. **Move the money off personal details.** Three separate places, all
+   currently pointing at an individual:
+   - **Stripe**: membership payments land in Mike's personal bank account.
+     Swap to BARNA's account and sort code. Most urgent of the three, since
+     it is charity income going to a trustee.
+   - **Memberstack**: the £11/month subscription is on a personal card.
+   - **20i**: the domain renewal card, and the account's only login email.
+3. **Create `info@barna.co.uk`.** Now possible: DNS is under BARNA's control
+   at 20i, and 20i does mailboxes.
+4. Then the Memberstack custom sender and its DKIM records (section 4).
+
+⚠️ Note on the order of 1 and 3. Memberstack's default sender
+(`no-reply@memberstack.io`) works, so the legacy members *can* be onboarded
+before the mailbox exists. But Memberstack has a known issue with
+verification and welcome mail landing in spam, and 91 undelivered password
+resets becomes 91 support emails. Doing step 3 first is cheap now that DNS
+is in hand. Flagged, and Mike has chosen members first.
+
+**Also outstanding:**
 - Memberstack custom email sender + its DKIM records (section 4).
 - Onboard the ~91 legacy members onto Manual Access with `accessexpiresat`
   dates. Possible today via Memberstack's default sender, but better after
