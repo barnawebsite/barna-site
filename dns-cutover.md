@@ -202,12 +202,11 @@ and confirm a test message from an outside address arrives.
 If a second mailbox is ever genuinely needed, that is the point at which a
 package becomes the honest answer — not before.
 
-#### Creating the mailbox adds four CNAMEs — leave them alone
+#### Four stackmail CNAMEs live in the zone — leave them alone
 
-20i silently wrote these into the zone at the same time. They are mail
-client autodiscovery records, not cruft, and they are **not** in the
-original zone list further down this document because they did not exist
-when it was written:
+These are mail client autodiscovery records, not cruft. They are **not**
+in the original zone list further down this document, which was only ever
+the minimal must-exist set rather than a full dump:
 
 ```
 CNAME  imap    imap.stackmail.com.
@@ -239,9 +238,32 @@ pointed at the real hostnames instead.
 In Outlook, choose manual setup and pick **IMAP**. Letting it autodiscover
 tends to guess Exchange or Outlook.com and fail confusingly.
 
+They were first noticed on 1 Sep 2026, right after the mailbox was created,
+and initially written up here as having been added by that step. That was
+probably wrong: the zone's SOA serial still read 31 Aug 15:36 afterwards,
+so the zone had not been written that day and the records almost certainly
+predate the mailbox. Do not expect creating a mailbox to generate DNS.
+
 Zone verified 1 Sep 2026 after the mailbox was created: four GitHub A
 records, `www` CNAME, apex MX and one apex SPF all unchanged, no wildcard
 `*` record, and `https://barna.co.uk` still 200.
+
+#### ⚠️ 20i's DNS editor does not save as you type
+
+Adding rows fills in the form only. The zone is untouched until an explicit
+save at the bottom of the page. On 1 Sep 2026 all three Resend records
+looked correct on screen while none of the four `ns*.stackdns.com`
+nameservers had them.
+
+The quick way to tell the difference, rather than assuming propagation
+delay:
+
+```
+dig +short SOA barna.co.uk @ns1.stackdns.com
+```
+
+The first number is a unix timestamp of the last zone write. If it predates
+the edit, nothing was saved and waiting will not help.
 
 Role addresses for everyone else (`treasurer@`, `membership@`, `chair@`)
 should be free **forwarders** pointing at personal inboxes, not mailboxes
