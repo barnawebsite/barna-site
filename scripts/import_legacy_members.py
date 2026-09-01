@@ -103,6 +103,9 @@ def api(method, path, payload=None):
 def fetch_all_members():
     """Every existing member, so the run is idempotent and matches on email."""
     members, end_param = [], ""
+    # The package builds this as `first=`, not `limit=`, but
+    # check_member_expiry.py has run in production on `limit=` since Aug 2026.
+    # Either way the cursor loop below walks every page, so both are correct.
     while True:
         page = api("GET", f"/members?limit=50{end_param}")
         members.extend(page["data"])
@@ -115,11 +118,15 @@ def fetch_all_members():
 def create_member(row, password):
     """Create a member already on the Manual Access plan.
 
-    Mirrors the official @memberstack/admin package's createMember():
-    POST /members. Like remove-plan, this is not in the public REST docs —
-    those only cover Data Tables — so it was taken from the package source.
-    Re-read lib/methods/members/index.js in the npm tarball if it ever
-    starts failing rather than guessing at the payload.
+    Mirrors createMember() in @memberstack/admin: POST /members, with the
+    body being exactly the Params.CreateMember shape
+    (email, password, customFields, metaData, plans). Like remove-plan this
+    is not in the public REST docs, which only cover Data Tables, so it was
+    read out of the package source — verified against v1.6.0,
+    lib/methods/members/index.js and lib/types/params.d.ts, 1 Sep 2026.
+    Re-read those rather than guessing if it ever starts failing.
+
+    Responses are {"data": {...}}, per SinglePayload in lib/types/payload.d.ts.
     """
     return api("POST", "/members", {
         "email": row["email"],
@@ -140,6 +147,18 @@ def add_plan(member_id):
 
 def update_custom_fields(member_id, fields):
     return api("PATCH", f"/members/{member_id}", {"customFields": fields})
+
+
+def mark_verified(member_id):
+    """Mark the email address as already verified.
+
+    Params.CreateMember has no `verified`, only Params.UpdateMember does, so
+    this is a second call after the create. These are existing BARNA members
+    whose addresses are known good, and Memberstack has a known problem with
+    its verification mail landing in spam. Pre-verifying removes one way for
+    the onboarding to fail silently. Use --no-verify to leave it to them.
+    """
+    return api("PATCH", f"/members/{member_id}", {"verified": True})
 
 
 def custom_fields(row):
@@ -191,6 +210,8 @@ def main():
                     help="only process the first N importable rows (test batch)")
     ap.add_argument("--log", default="_member-list/import-log.csv",
                     help="where to write the per-member result")
+    ap.add_argument("--no-verify", action="store_true",
+                    help="do not pre-mark new members' email as verified")
     args = ap.parse_args()
 
     with open(args.source, newline="", encoding="utf-8-sig") as fh:
@@ -208,6 +229,7 @@ def main():
         todo = todo[:args.limit]
 
     print(f"Mode: {'LIVE' if LIVE else 'DRY RUN'}")
+    print(f"New members pre-verified: {'no' if args.no_verify else 'yes'}")
     print(f"Source: {args.source}")
     print(f"Rows: {len(rows)}, marked skip: {len(skipped)}, to process: {len(todo)}"
           + (f" (limited to {args.limit})" if args.limit else ""))
@@ -238,6 +260,8 @@ def main():
             if member is None:
                 created = create_member(row, secrets.token_urlsafe(24))
                 member_id = created.get("data", created).get("id", "")
+                if not args.no_verify and member_id:
+                    mark_verified(member_id)
             else:
                 member_id = member["id"]
                 if not has_active_plan(member):
