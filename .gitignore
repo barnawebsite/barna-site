@@ -1,3 +1,8 @@
 .DS_Store
 .claude/
 _to-upload-google-drive/
+
+# Filled-in legacy member lists — real names and emails, never commit
+_member-list/
+*member*import*.csv
+!scripts/member-import-template.csv

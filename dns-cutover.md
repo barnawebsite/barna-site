@@ -213,6 +213,25 @@ They are harmless to the website — only the apex A records and `www`
 matter to GitHub Pages — and they do not collide with the `send`
 subdomain Memberstack needs. Do not remove them while tidying.
 
+⚠️ **But do not use them in a mail client.** Checked 1 Sep 2026:
+`imap.barna.co.uk` and `smtp.barna.co.uk` resolve correctly, but the
+server presents a certificate for `*.stackmail.com` only, so TLS fails on
+a hostname mismatch. Outlook, Apple Mail and anything else must be
+pointed at the real hostnames instead.
+
+#### Mail client settings for `info@barna.co.uk`
+
+| Setting | Value |
+|---|---|
+| Incoming | IMAP, `imap.stackmail.com`, port 993, SSL/TLS |
+| Outgoing | SMTP, `smtp.stackmail.com`, port 465 SSL/TLS (or 587 STARTTLS) |
+| Username | the full address, `info@barna.co.uk`, not `info` |
+| Password | the mailbox password |
+| Outgoing auth | required — the server offers PLAIN, LOGIN and CRAM-MD5 |
+
+In Outlook, choose manual setup and pick **IMAP**. Letting it autodiscover
+tends to guess Exchange or Outlook.com and fail confusingly.
+
 Zone verified 1 Sep 2026 after the mailbox was created: four GitHub A
 records, `www` CNAME, apex MX and one apex SPF all unchanged, no wildcard
 `*` record, and `https://barna.co.uk` still 200.
