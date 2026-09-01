@@ -601,6 +601,22 @@ members area, and full control of registrant, registrar and DNS.
    the Admin API cannot set a password on an existing member, so every one
    of them sets their own via a reset email. Send a test batch of five
    before doing all 91.
+
+   Checked 1 Sep 2026, two prerequisites are missing before this can start:
+   - **There is no member list in the repo.** Names, emails and each
+     person's real expiry date have to be exported from wherever the
+     legacy records actually live. Nothing can be scripted until that
+     exists.
+   - **There is no import script.** `scripts/check_member_expiry.py` is
+     only the removal half. A create/onboard script has to be written; it
+     should reuse that file's patterns — `https://admin.memberstack.com`,
+     the `X-API-KEY` header, `require_env` for config, and above all
+     **dry run by default**.
+
+   ⚠️ **This repo is public.** A spreadsheet of 91 members' names and email
+   addresses must never be committed to it. Keep the list outside the repo
+   entirely, or add it to `.gitignore` *before* it is saved anywhere near
+   the working directory, the way `_to-upload-google-drive/` is handled.
 3. **Move the money off personal details.** Three separate places, all
    currently pointing at an individual:
    - **Stripe**: membership payments land in Mike's personal bank account.
