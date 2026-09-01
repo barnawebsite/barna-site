@@ -317,7 +317,7 @@ advice for the Name field, not the value field — paste MX and DKIM
 Propagation can take up to 24 hours, though 20i is usually minutes. Click
 Verify in Memberstack after the records resolve, not before.
 
-#### ⚠️ BLOCKED 1 Sep 2026: 20i saves the records but does not publish them
+#### ⚠️ RESOLVED 1 Sep 2026: a second 20i account still held DNS authority
 
 All three records were entered correctly, `Update DNS` was clicked, and the
 panel confirmed "Your changes have been saved". They still do not exist in
@@ -337,14 +337,29 @@ because identical zones give identical answers right up until you add a
 record to one of them. The note in section 10 saying "it no longer matters
 which zone is authoritative" is wrong, and this is how it surfaced.
 
-This needs 20i support to say which zone is authoritative and remove the
-duplicate. It is not fixable from the DNS editor.
+**20i support confirmed exactly this** and fixed it in minutes: *"another
+20i account has a barna.co.uk package which currently has authority"* —
+the old reseller's. Because the domain itself sits in BARNA's account they
+were able to move authority across. Serial jumped to 15:29 and all three
+records went live immediately, reaching Cloudflare and Google DNS within
+minutes.
 
-Memberstack meanwhile sits at **"Verifying..."** rather than failing, and
-re-checks by itself, so nothing needs re-adding once DNS is right.
+Lessons worth keeping:
+- **Owning the domain is not the same as holding its DNS authority.** Both
+  can sit in different 20i accounts, and the panel gives no hint which one
+  is winning. Section 10's "it no longer matters which zone is
+  authoritative" was wrong, and reconciling the two zones is what hid it.
+- **The SOA serial is the tell.** A frozen serial after a successful save
+  means the zone answering queries is not the zone being edited. That check
+  turned a propagation guess into a five minute support ticket.
+- **Before an authority move, verify the receiving zone is complete.** It
+  becomes live the instant they switch, so anything missing breaks the site
+  and mail at that moment.
 
 Mail and the website were unaffected throughout: apex MX, apex SPF, the A
-records and `https://barna.co.uk` all verified good after every step.
+records, `www`, the stackmail CNAMEs, absence of a wildcard, mail
+acceptance for `info@`, and `https://barna.co.uk` were all re-verified
+after the switch.
 
 ### 4c. Check it
 
