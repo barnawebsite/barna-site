@@ -294,6 +294,58 @@ def explain(exc):
     return text
 
 
+def set_login_redirect(url):
+    """Point every existing member at a real page after they authenticate.
+
+    Memberstack works out where to send someone from the app's configured
+    domain plus the redirect paths in Plans -> Default Settings. When it
+    cannot, it strands them on memberstack.com instead. loginRedirect is set
+    per member and takes precedence, so this fixes the people already
+    imported without touching any dashboard setting.
+    """
+    if not url.startswith("https://"):
+        sys.exit(f"\nERROR: {url!r} is not an https:// URL.\n")
+
+    try:
+        members = fetch_all_members()
+    except Exception as exc:
+        sys.exit(f"\nERROR: could not read the member list.\n\n  "
+                 f"{explain(exc)}\n\n  Nothing was changed.\n")
+
+    print(f"Mode: {'LIVE' if LIVE else 'DRY RUN'}")
+    print(f"Members found: {len(members)}")
+    print(f"Setting loginRedirect to: {url}")
+    print()
+
+    changed = failures = 0
+    for member in members:
+        email = member["auth"]["email"]
+        if member.get("loginRedirect") == url:
+            print(f"  already set  {email}")
+            continue
+        if not LIVE:
+            print(f"  would set    {email}  (was {member.get('loginRedirect')!r})")
+            changed += 1
+            continue
+        try:
+            api("PATCH", f"/members/{member['id']}", {"loginRedirect": url})
+            print(f"  set          {email}")
+            changed += 1
+            time.sleep(0.3)
+        except Exception as exc:
+            failures += 1
+            print(f"  FAILED       {email}: {explain(exc)}")
+
+    print()
+    if not LIVE:
+        print(f"Dry run only, nothing changed. {changed} would be updated.")
+        print("Set MEMBER_IMPORT_LIVE_MODE=true to apply.")
+        return
+    print(f"Done. {changed} updated, {failures} failed.")
+    if failures:
+        sys.exit(1)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("source", help="CSV from prepare_member_import.py")
@@ -307,7 +359,15 @@ def main():
                     help="where to write the per-member result")
     ap.add_argument("--no-verify", action="store_true",
                     help="do not pre-mark new members' email as verified")
+    ap.add_argument("--set-login-redirect", metavar="URL",
+                    help="set loginRedirect on every member already in "
+                         "Memberstack and exit. Use when Memberstack cannot "
+                         "work out where to send people after they verify or "
+                         "log in, and drops them on a memberstack.com page.")
     args = ap.parse_args()
+
+    if args.set_login_redirect:
+        return set_login_redirect(args.set_login_redirect)
 
     with open(args.source, newline="", encoding="utf-8-sig") as fh:
         rows = list(csv.DictReader(fh))
