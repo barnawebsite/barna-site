@@ -166,15 +166,34 @@ becomes the 20i account login (section 11). Mail for barna.co.uk already
 points at `mx.stackmail.com`, which is 20i's own mail platform, so the
 mailbox belongs there and **no MX change is needed to create it**.
 
-20i control panel → **Email** → the barna.co.uk domain → **Add Mailbox**
-→ `info` → set a password → save. Then log into webmail once
-(`https://webmail.stackmail.com`) and confirm a test message from an
-outside address arrives.
+#### ⚠️ Do NOT buy a hosting package for this
+
+20i bundles mailboxes with hosting, so the obvious read of their pricing
+is that email needs a package. It does not. **20i allows exactly one
+mailbox per domain with no hosting at all**, which is precisely what BARNA
+needs — `info@` is the only address that has to receive anything. The site
+is on GitHub Pages and needs no hosting either.
+
+It is also not merely wasteful: the mailbox screen appears on the domain
+**only while no hosting is attached**. Buying a package moves email
+management into the package instead, so it changes the route as well as
+the bill.
+
+20i control panel → **Manage Domain Names** → `barna.co.uk` → **Options →
+Manage** → **Email Accounts** → type `info` → **Create Email Account** →
+set a password. Then log into webmail once (`https://webmail.stackmail.com`)
+and confirm a test message from an outside address arrives.
+
+If a second mailbox is ever genuinely needed, that is the point at which a
+package becomes the honest answer — not before.
 
 Role addresses for everyone else (`treasurer@`, `membership@`, `chair@`)
 should be free **forwarders** pointing at personal inboxes, not mailboxes
 — when someone steps down you change the forward instead of hunting for
-logins. `info@` is the exception because it has to receive.
+logins. `info@` is the exception because it has to receive. Forwarders
+appear to live under the same domain management screen and to sit outside
+the one-mailbox limit, but that was not confirmed against a live account,
+so check it rather than promising anyone an address.
 
 ### 4b. Point Memberstack at it
 
