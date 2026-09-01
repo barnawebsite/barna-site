@@ -67,6 +67,13 @@ def require_env(name, where, example=""):
 
 
 API_KEY = require_env("MEMBERSTACK_SECRET_KEY", "Secrets")
+if "paste" in API_KEY.lower() or "here" in API_KEY.lower():
+    sys.exit(
+        "\nERROR: MEMBERSTACK_SECRET_KEY is still the placeholder text, not a real key.\n\n"
+        "  Get one from Memberstack -> Settings -> API keys, in LIVE mode.\n"
+        "  A real key starts with 'sk_'.\n\n"
+        "  Nothing was changed in Memberstack.\n"
+    )
 PLAN_ID = require_env(
     "MANUAL_ACCESS_PLAN_ID", "Variables", "pln_barna-member-manual-access-xx8x0ihb"
 )
@@ -203,6 +210,27 @@ def validate(rows):
                  + "\n\n  Nothing was changed in Memberstack.\n")
 
 
+FRIENDLY_ERRORS = {
+    "validation/invalid-secret-key":
+        "Memberstack rejected the API key.\n"
+        "  - Check it is copied whole, including the 'sk_' at the front.\n"
+        "  - Check it is the LIVE key, not the Test one. They are different,\n"
+        "    and a test key will not see any live members.",
+    "validation/plan-not-found":
+        "Memberstack does not recognise MANUAL_ACCESS_PLAN_ID.\n"
+        "  It should be pln_barna-member-manual-access-xx8x0ihb.",
+}
+
+
+def explain(exc):
+    """Turn an API failure into something readable, with no traceback."""
+    text = str(exc)
+    for code, advice in FRIENDLY_ERRORS.items():
+        if code in text:
+            return f"{advice}\n\n  Full response: {text}"
+    return text
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("source", help="CSV from prepare_member_import.py")
@@ -235,7 +263,11 @@ def main():
           + (f" (limited to {args.limit})" if args.limit else ""))
     print()
 
-    existing = {m["auth"]["email"].lower(): m for m in fetch_all_members()}
+    try:
+        existing = {m["auth"]["email"].lower(): m for m in fetch_all_members()}
+    except Exception as exc:
+        sys.exit(f"\nERROR: could not read the member list.\n\n  "
+                 f"{explain(exc)}\n\n  Nothing was changed in Memberstack.\n")
     print(f"Members already in Memberstack: {len(existing)}")
     print()
 
@@ -272,7 +304,7 @@ def main():
             time.sleep(0.3)                     # stay well inside the rate limit
         except Exception as exc:
             failures += 1
-            print(f"  FAILED  {email}: {exc}")
+            print(f"  FAILED  {email}: {explain(exc)}")
             results.append((email, row["legacy_id"], "FAILED", str(exc)))
 
     log_dir = os.path.dirname(args.log)
