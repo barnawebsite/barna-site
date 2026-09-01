@@ -10,8 +10,9 @@ The rules it applies, all agreed with Mike 1 Sep 2026:
   - expiry = "Last Renewal Date" + 12 months
   - board members get no expiry date at all (the literal string "never"),
     keeping access until someone removes them by hand
-  - anyone whose +12 months has already passed is NOT imported; they rejoin
-    and pay through Stripe like a new member
+  - everyone is imported, including anyone already past their date (Mike's
+    call, 1 Sep 2026: the membership secretary reconciles the edge cases in
+    Memberstack afterwards). Those rows carry a review_note instead.
 
 Nothing here touches Memberstack. It only reads a file and writes a file.
 
@@ -40,12 +41,12 @@ LAST_COL = "last name"
 EMAIL_COL = "email"
 
 OUT_HEADER = ["email", "first_name", "last_name",
-              "access_expires_at", "legacy_id", "skip"]
+              "access_expires_at", "legacy_id", "skip", "review_note"]
 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[a-z]{2,}$", re.I)
 
 
-def parse_renewal_date(raw):
+def parse_renewal_date(raw, today):
     """Parse the free-text renewal dates the sheet actually contains.
 
     Handles '4th July 2026', 'Jan 2026', '8/9/2026 11:41:51'. Returns
@@ -64,15 +65,23 @@ def parse_renewal_date(raw):
         return (datetime.date(int(m.group(2)), MONTHS[m.group(1)[:3]], 1),
                 f"no day given in {raw.strip()!r}, assumed the 1st")
 
+    # Slash dates are raw form/payment timestamps and their order is not
+    # stated. Read them UK-first, but a *last* renewal date cannot be in the
+    # future, so fall back to US order when the UK reading is.
     m = re.match(r"^(\d{1,2})/(\d{1,2})/(\d{4})", text)
     if m:
-        day, month = int(m.group(1)), int(m.group(2))
+        day, month, year = int(m.group(1)), int(m.group(2)), int(m.group(3))
         note = None
-        if day <= 12 and month <= 12 and day != month:
-            note = (f"{raw.strip()!r} is ambiguous, read as UK day/month "
-                    f"({day:02d}/{month:02d}); US order would give "
-                    f"{month:02d}/{day:02d}")
-        return datetime.date(int(m.group(3)), month, day), note
+        swappable = day <= 12 and month <= 12 and day != month
+        uk = datetime.date(year, month, day) if month <= 12 else None
+        if uk and uk > today and swappable:
+            note = (f"{raw.strip()!r} read as US month/day, because day/month "
+                    f"would put the last renewal in the future")
+            day, month = month, day
+        elif swappable:
+            note = (f"{raw.strip()!r} is ambiguous, read as UK day/month; "
+                    f"US order would give {month:02d}/{day:02d}")
+        return datetime.date(year, month, day), note
 
     return None, f"could not read the date {raw.strip()!r}"
 
@@ -117,6 +126,10 @@ def main():
     out_rows, notes, seen_emails = [], [], {}
     counts = {"board": 0, "import": 0, "expired": 0}
 
+    def flag(sheet_row, email, why):
+        notes.append((sheet_row, email, why))
+        return why
+
     # Sheet row numbers start at 2: row 1 is the header.
     for sheet_row, row in enumerate(rows[1:], start=2):
         def cell(key):
@@ -131,49 +144,52 @@ def main():
 
         board_cell = row[0].strip() if col["board"] is not None else ""
         is_board = board_cell.lower() == "board member"
+        review = []
         if board_cell and not is_board:
-            notes.append((sheet_row, email,
-                          f"unrecognised value {board_cell!r} in the board "
-                          f"column, treated as NOT a board member"))
+            review.append(flag(sheet_row, email,
+                               f"unrecognised value {board_cell!r} in the board "
+                               f"column, treated as NOT a board member"))
 
         if not EMAIL_RE.match(email):
-            notes.append((sheet_row, email, "email does not look valid"))
+            review.append(flag(sheet_row, email, "email does not look valid"))
         key = email.lower()
         if key in seen_emails:
-            notes.append((sheet_row, email,
-                          f"duplicate of sheet row {seen_emails[key]}"))
+            review.append(flag(sheet_row, email,
+                               f"duplicate of sheet row {seen_emails[key]}"))
         else:
             seen_emails[key] = sheet_row
 
         if is_board:
             counts["board"] += 1
-            out_rows.append([email, first, last, "never", legacy_id, ""])
+            out_rows.append([email, first, last, "never", legacy_id, "",
+                             "; ".join(review)])
             continue
 
-        renewed, note = parse_renewal_date(cell("renewal"))
+        renewed, note = parse_renewal_date(cell("renewal"), today)
         if note:
-            notes.append((sheet_row, email, note))
+            review.append(flag(sheet_row, email, note))
         if renewed is None:
-            out_rows.append([email, first, last, "", legacy_id,
-                             "unreadable renewal date, needs a decision"])
+            review.append("no expiry date could be set, needs one by hand")
+            out_rows.append([email, first, last, "", legacy_id, "",
+                             "; ".join(review)])
             continue
 
         expires = plus_twelve_months(renewed)
-        if expires < today:
+        stamp = expires.strftime("%d/%m/%Y")
+        days = (expires - today).days
+        if days < 0:
             counts["expired"] += 1
-            out_rows.append([email, first, last, expires.strftime("%d/%m/%Y"),
-                             legacy_id,
-                             f"already expired {expires.strftime('%d/%m/%Y')}, "
-                             f"rejoins via Stripe"])
-            continue
-
-        counts["import"] += 1
-        if (expires - today).days <= 45:
-            notes.append((sheet_row, email,
-                          f"expires {expires.strftime('%d/%m/%Y')}, only "
-                          f"{(expires - today).days} days after onboarding"))
-        out_rows.append([email, first, last, expires.strftime("%d/%m/%Y"),
-                         legacy_id, ""])
+            review.append(flag(sheet_row, email,
+                               f"ALREADY EXPIRED {stamp}, the daily job will "
+                               f"remove access at the next 07:00 run"))
+        else:
+            counts["import"] += 1
+            if days <= 45:
+                review.append(flag(sheet_row, email,
+                                   f"expires {stamp}, only {days} days after "
+                                   f"onboarding"))
+        out_rows.append([email, first, last, stamp, legacy_id, "",
+                         "; ".join(review)])
 
     out_dir = os.path.dirname(args.out)
     if out_dir:
@@ -185,9 +201,9 @@ def main():
 
     print(f"Read {len(rows) - 1} sheet rows, wrote {len(out_rows)} to {args.out}")
     print()
-    print(f"  will be imported with an expiry date : {counts['import']}")
+    print(f"  live, with a future expiry date      : {counts['import']}")
     print(f"  board members, no expiry ('never')   : {counts['board']}")
-    print(f"  skipped, already expired             : {counts['expired']}")
+    print(f"  imported but already expired         : {counts['expired']}")
     print()
     if notes:
         print(f"NEEDS A HUMAN LOOK ({len(notes)}):")

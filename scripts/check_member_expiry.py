@@ -6,6 +6,9 @@ legacy members temporary access without going through Stripe), this checks
 each member's `accessexpiresat` custom field (format DD/MM/YYYY) against
 today's date and removes the plan from anyone whose date has passed.
 
+The literal value "never" means open-ended access and is left alone. It is
+used for board members, who keep access until someone removes them by hand.
+
 Dry run by default: only prints what it would do. Set EXPIRY_CHECK_LIVE_MODE=true
 to actually remove access. Real members on a real paid plan are never touched —
 this only ever looks at the Manual Access plan.
@@ -102,6 +105,7 @@ def main():
 
     to_remove = []
     to_keep = []
+    to_never = []
     to_check = []
 
     for m in members:
@@ -119,6 +123,10 @@ def main():
             to_check.append((email, "no accessexpiresat value set"))
             continue
 
+        if raw_date.strip().lower() == "never":
+            to_never.append(email)
+            continue
+
         expiry = parse_uk_date(raw_date)
         if expiry is None:
             to_check.append((email, f"unparseable date '{raw_date}'"))
@@ -131,7 +139,8 @@ def main():
 
     print(f"Today: {today.isoformat()}")
     print(f"Mode: {'LIVE' if LIVE else 'DRY RUN'}")
-    print(f"Members on Manual Access plan: {len(to_remove) + len(to_keep) + len(to_check)}")
+    print(f"Members on Manual Access plan: "
+          f"{len(to_remove) + len(to_keep) + len(to_never) + len(to_check)}")
     print()
 
     print(f"{'REMOVING' if LIVE else 'WOULD REMOVE'} ({len(to_remove)}):")
@@ -142,6 +151,12 @@ def main():
     print(f"OK, staying ({len(to_keep)}):")
     for email, expiry in to_keep:
         print(f"  - {email}  (expires {expiry.isoformat()})")
+
+    if to_never:
+        print()
+        print(f"Open-ended, no expiry set ({len(to_never)}):")
+        for email in to_never:
+            print(f"  - {email}")
 
     if to_check:
         print()

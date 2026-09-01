@@ -170,9 +170,16 @@ mailbox belongs there and **no MX change is needed to create it**.
 
 `info@barna.co.uk` was created this way: Standard mailbox, 10 GB, zero
 bytes used. **Confirmed in practice that 20i charges nothing extra and
-asks for no package.** The panel warns that a new mailbox can take up to
-30 minutes to start receiving, so a failed test straight after creating it
-means wait, not broken.
+asks for no package.**
+
+⚠️ **Inbound took about an hour to start working, not the 30 minutes 20i
+advertises.** Created 13:35, first successful inbound delivery around
+14:30. Sending *out* from webmail worked almost immediately, and logging in
+worked immediately, which makes the gap genuinely confusing: every signal
+says the mailbox is fine while mail still goes nowhere. Throughout that
+window the MX correctly answered `250 Accepted` for the address, so nothing
+was being lost, just not yet delivered. If this happens again, wait a full
+hour before treating it as a fault or raising a ticket.
 
 #### ⚠️ Do NOT buy a hosting package for this
 
