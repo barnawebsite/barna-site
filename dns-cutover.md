@@ -22,9 +22,22 @@ over HTTPS. Kept below for the record and for the parts still outstanding.
 | HTTPS | Let's Encrypt cert for barna.co.uk issued 13:57 UTC, auto-renews |
 | Nominet data quality | validated 31 Aug 2026, registrant corrected to BARNA |
 
-Still outstanding: Enforce HTTPS tickbox, the registrar move off SYPO
-(section 9), a mailbox on the domain, Memberstack Live Mode and its DKIM
-records, DMARC, and retiring the old Weebly site.
+**Registrar move completed 1 Sep 2026.** BARNA now holds every layer:
+
+| Layer | Holder |
+|---|---|
+| Registrant (legal owner) | BARNA, validated at Nominet 31 Aug 2026 |
+| Registrar | 20i Ltd, tag `STACK` (was Web by Numbers, `SYPO`) |
+| DNS zone | BARNA's own 20i account |
+| Website | GitHub Pages, `barnawebsite/barna-site` |
+
+No third party sits in that chain any more. Nameservers remain
+`ns1-4.stackdns.com`, which is correct: those are 20i's own shared
+nameservers, used by their direct customers as well as their resellers.
+
+Still outstanding: a mailbox on the domain, the Memberstack custom sender
+and its DKIM records, onboarding the legacy members, DMARC, and retiring
+the old Weebly site.
 
 ---
 
@@ -362,7 +375,37 @@ But decide deliberately at the time:
 
 Only ever one SPF record. Merge, never add a second.
 
-### DECIDED (31 Aug 2026): Cloudflare for registrar + DNS
+### DONE (1 Sep 2026): moved to 20i, not Cloudflare
+
+Cloudflare was the first choice on technical merit but was dropped: it
+requires the domain to be **active on Cloudflare DNS before** you can buy
+the registration, and Nominet does not let a registrant change
+nameservers. That needed the old registrar's help. 20i needed nobody.
+
+What actually happened, and the two things that caught us out:
+
+1. **The Nominet registrar change cost £12, not £0.** The intro page said
+   "our fee of £0.00 plus VAT"; the summary page charged £10 plus VAT.
+   Alan could likely have pushed the tag for free from the registrar side.
+   Paid it for independence.
+2. **20i's tag is `STACK`.** Not `20I`. `PROSTACK` sits directly beneath
+   it in Nominet's registrar search, so read the entry, not the position.
+3. **20i creates a FRESH, EMPTY zone when a domain lands. It does not
+   copy the live one.** The new zone pointed the apex at 20i's parking IP
+   `185.151.30.138`, had a wildcard `*` A record, no `www`, and an SPF
+   ending `-all` instead of `~all`. Saving it as-is would have taken the
+   site down. The live site kept working only because the old reseller's
+   zone was still answering. **Always compare the new zone against `dig`
+   output before trusting it.**
+4. **20i's DNS Name field appends the domain, and `@` auto-expands.**
+   Typing `barna.co.uk` produced `barna.co.uk.barna.co.uk`, a subdomain
+   that silently does nothing. Getting apex records in took support's
+   help. Subdomain entries (`www`) work as expected.
+
+The zone was then made an exact match for what was already live, so it no
+longer matters which zone is authoritative.
+
+### Superseded: the Cloudflare plan (31 Aug 2026)
 
 Email is deliberately **not** moving with it. BARNA's shared Google account
 is Jane's personal one with live correspondence running through it, so that
@@ -433,11 +476,10 @@ identically.
 Live and working: domain, HTTPS, Memberstack in live mode, payments,
 discount codes, gated members area.
 
-**Next, and gating most of the rest:**
-- Move the registrar off SYPO (section 10). Everything below waits on the
-  DNS control this gives.
+**Done:** domain, HTTPS, Memberstack live, payments, discount codes, gated
+members area, and full control of registrant, registrar and DNS.
 
-**Then:**
+**Next:**
 - Memberstack custom email sender + its DKIM records (section 4).
 - Onboard the ~91 legacy members onto Manual Access with `accessexpiresat`
   dates. Possible today via Memberstack's default sender, but better after
@@ -454,3 +496,7 @@ discount codes, gated members area.
 - Untick the two WHOIS privacy flags at Nominet if still set. A charity is
   not eligible for the opt-out, and the address is public on the charity
   register anyway.
+- The 20i account is registered to BARNA as an organisation, but the only
+  login email on it is a personal one. Add a second user, or move it to a
+  `@barna.co.uk` address once one exists. This is the exact failure the
+  whole exercise was fixing, so do not let it settle.
