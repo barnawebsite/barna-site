@@ -317,6 +317,35 @@ advice for the Name field, not the value field — paste MX and DKIM
 Propagation can take up to 24 hours, though 20i is usually minutes. Click
 Verify in Memberstack after the records resolve, not before.
 
+#### ⚠️ BLOCKED 1 Sep 2026: 20i saves the records but does not publish them
+
+All three records were entered correctly, `Update DNS` was clicked, and the
+panel confirmed "Your changes have been saved". They still do not exist in
+DNS:
+
+- absent from **all four** of `ns1` to `ns4.stackdns.com`
+- all four report the identical SOA serial `1788187007`, which is
+  **31 Aug 2026 15:36**, so the zone has not been written since the day
+  before the edit
+- still absent after a 7 minute poll
+
+Leading theory, and it fits the history in section 10: when the domain
+landed at 20i a **fresh empty zone** was created alongside the old
+reseller's zone, and the old one is still the zone answering queries.
+Making the two match at the time hid the problem rather than solving it,
+because identical zones give identical answers right up until you add a
+record to one of them. The note in section 10 saying "it no longer matters
+which zone is authoritative" is wrong, and this is how it surfaced.
+
+This needs 20i support to say which zone is authoritative and remove the
+duplicate. It is not fixable from the DNS editor.
+
+Memberstack meanwhile sits at **"Verifying..."** rather than failing, and
+re-checks by itself, so nothing needs re-adding once DNS is right.
+
+Mail and the website were unaffected throughout: apex MX, apex SPF, the A
+records and `https://barna.co.uk` all verified good after every step.
+
 ### 4c. Check it
 
 ```
