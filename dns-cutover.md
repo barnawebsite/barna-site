@@ -425,24 +425,55 @@ senders need two different DKIM keys. Do not read the Resend record as
 Email → DomainKeys**. **BARNA deliberately has no hosting package**
 (section 4a), so that path may simply not exist in the panel.
 
-Look first on the same screen the mailbox lives on:
+#### ⚠️ CONFIRMED 2 Sep 2026: DKIM is NOT available on the domain screen
 
-**Manage Domain Names → `barna.co.uk` → Options → Manage**, then look for
-**DomainKeys** or **DKIM** in the Email section, next to Email Accounts.
+Checked in the panel. **Manage Domain Names → `barna.co.uk` → Options →
+Manage** offers, in full:
+
+- Domain Management: Manage DNS, Domain Contacts, WHOIS, Nameservers,
+  Domain Privacy, DNSSEC Protection, Domain Forwarding, Renew Domain,
+  Free Web Hosting, Transfer Away, Add Hosting Package
+- Email Management: Email Accounts, Email Forwarders, Catch-All
+  Forwarders, Autoresponders, Send-only Addresses, Receive-only
+  Addresses, Junk Mail Filters
+
+No DomainKeys. No DKIM. So this cannot be self-served from the domain, and
+the mailbox-only setup that section 4a is otherwise right to recommend has
+this one real gap.
+
+#### ⚠️ Adding the TXT record by hand does NOT work
+
+Tempting, because Manage DNS is right there. It achieves nothing. DKIM is a
+*signature applied by the sending server*, and the TXT record only publishes
+the public key that verifies it. StackMail's relay has to be told to sign;
+until it does, a published key just advertises a signature that never
+arrives. Do not spend time hand-crafting a record.
+
+#### The route: a 20i support ticket
+
+Section 11 has the drafted message. Two questions in one ticket: enable
+signing on a mailbox-only domain, or failing that, confirm whether the
+**Free Web Hosting** package exposes the DomainKeys tool *and leaves the
+existing `info@` mailbox and its stored mail intact*.
+
+That second half is the whole risk. Section 4a: the email screens live on
+the domain **only while no hosting is attached**, so attaching a package
+moves email management into the package. Whether the existing mailbox
+migrates cleanly or has to be recreated is not documented anywhere, and
+finding out by trying it, days before onboarding 91 members, is not the
+time. Get it in writing first.
+
+If 20i cannot sign at all without a package, the honest fallback is to send
+the membership mailouts through a service that does DKIM properly rather
+than to bend the mail hosting around it (section 5d).
+
+For reference, when the DomainKeys tool *is* reachable it works like this:
 
 - Selector: any name will do. `default` is fine.
 - Click **Add Signature**. Because the nameservers are 20i's own
   (`ns1-4.stackdns.com`), 20i writes the TXT record into the zone itself.
 - Signing starts on the next message sent; DNS then has to resolve before
   Yahoo will accept it.
-
-⚠️ **If DomainKeys is not on that screen, raise a ticket — do not buy a
-hosting package to get at it.** Section 4a: attaching a package moves email
-management *into* the package, so it changes the route as well as the bill,
-and the mailbox screen disappears from the domain. 20i support moved DNS
-authority in minutes on 1 Sep 2026 when asked; ask them to enable DKIM
-signing for outbound StackMail on a mailbox-only domain and to publish the
-record.
 
 ⚠️ **Verify the record actually landed.** The 20i DNS editor's silent
 no-save (section 4a) and the split-authority problem (section 4b) both bit
@@ -819,6 +850,41 @@ members area, and full control of registrant, registrar and DNS.
 Note: Memberstack's default sender (`no-reply@memberstack.io`) does work, so
 the mailbox is about deliverability rather than possibility. It is first in
 the list because a bulk onboarding is exactly when spam-foldering hurts.
+
+### Drafted 20i support ticket: DKIM for `info@` (2 Sep 2026)
+
+Send from the 20i panel, **Help & Support**. Verified 2 Sep 2026 that there
+is no self-serve route, so this ticket is the next step and not a fallback.
+
+> Subject: Enable DKIM signing for barna.co.uk outbound email
+>
+> Hello,
+>
+> barna.co.uk is in my 20i account with a single StackMail mailbox,
+> info@barna.co.uk, and no hosting package attached. The nameservers are
+> ns1 to ns4.stackdns.com.
+>
+> Mail sent from that mailbox is being rejected by Yahoo, AOL and Sky with
+> a 550 error at RCPT TO saying "Please enable DKIM for your domain. Yahoo
+> requires all senders to authenticate with DKIM". Twelve recipients
+> bounced on a recent mailout to our members. The domain publishes SPF but
+> has no DKIM record.
+>
+> Your DomainKeys tool is documented under Manage Hosting. There is no
+> DomainKeys option on the Manage Domain Names screen for this domain,
+> which I assume is because no hosting package is attached.
+>
+> Could you please either:
+>
+> 1. Enable DKIM signing for outbound mail from info@barna.co.uk and
+>    publish the matching TXT record in the zone, or
+> 2. Confirm whether attaching the Free Web Hosting package would give me
+>    the DomainKeys tool, and whether doing so keeps the existing
+>    info@barna.co.uk mailbox and all of its stored mail intact. I do not
+>    want to risk breaking a working mailbox to reach a settings screen.
+>
+> Thank you,
+> Mike
 
 **Also outstanding:**
 - **DKIM for the `info@` mailbox (section 5).** Now urgent rather than
