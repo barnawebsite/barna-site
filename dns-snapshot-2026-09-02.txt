@@ -1,0 +1,51 @@
+# barna.co.uk zone snapshot, taken 2026-09-02 09:17 UTC from ns1.stackdns.com
+# Taken immediately BEFORE attaching 20i Free Web Hosting to reach the DKIM tool.
+# Purpose: restore these exact values if the package overwrites them.
+
+SOA:
+ns1.stackdns.com. hostmaster.stackdns.com. 1788272958 1800 900 1209600 300
+
+NS:
+ns1.stackdns.com.
+ns2.stackdns.com.
+ns4.stackdns.com.
+ns3.stackdns.com.
+
+APEX A (must stay the four GitHub Pages IPs):
+185.199.110.153
+185.199.109.153
+185.199.111.153
+185.199.108.153
+
+APEX AAAA:
+
+APEX MX (must stay 10 mx.stackmail.com):
+10 mx.stackmail.com.
+
+APEX TXT (must stay exactly ONE SPF record):
+"v=spf1 include:spf.stackmail.com a mx ~all"
+
+www:
+barnawebsite.github.io.
+barnawebsite.github.io.
+
+mail client CNAMEs:
+imap   imap.stackmail.com.
+mail   mail.stackmail.com.
+pop3   pop3.stackmail.com.
+smtp   smtp.stackmail.com.
+
+send.barna.co.uk (Memberstack/Resend):
+  MX  10 feedback-smtp.us-east-1.amazonses.com.
+  TXT "v=spf1 include:amazonses.com ~all"
+
+resend._domainkey:
+"p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDO4EFEWo7WjIUmtm/Qf+RmoUsUBFEU6+yYmLTBFPe+nPE5bmMD8iWPOxQfXQNJBLH2pfFfXVu2/CKmor8rtMUFvizQP2BUGBV8vIESf8Edw12qywcT0+PstJkfDMZ4Y4rbEKQE1rQ5SWidLoY3niEwsiQGo+k46EciCQemFv6R7wIDAQAB"
+
+_dmarc:
+  (empty = none, expected)
+
+wildcard check (must be empty):
+
+site check:
+https://barna.co.uk -> 200

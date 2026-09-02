@@ -422,8 +422,8 @@ senders need two different DKIM keys. Do not read the Resend record as
 ### 5a. Turn on DKIM signing at 20i
 
 20i's own documentation puts the tool at **Manage Hosting → the package →
-Email → DomainKeys**. **BARNA deliberately has no hosting package**
-(section 4a), so that path may simply not exist in the panel.
+Email → DomainKeys**. BARNA had no hosting package (section 4a), so that
+path did not exist in the panel at all.
 
 #### ⚠️ CONFIRMED 2 Sep 2026: DKIM is NOT available on the domain screen
 
@@ -449,25 +449,42 @@ the public key that verifies it. StackMail's relay has to be told to sign;
 until it does, a published key just advertises a signature that never
 arrives. Do not spend time hand-crafting a record.
 
-#### The route: a 20i support ticket
+#### 20i's answer, 2 Sep 2026: a package is mandatory
 
-Section 11 has the drafted message. Two questions in one ticket: enable
-signing on a mailbox-only domain, or failing that, confirm whether the
-**Free Web Hosting** package exposes the DomainKeys tool *and leaves the
-existing `info@` mailbox and its stored mail intact*.
+Arron H at 20i support: *"In order to set up a DKIM record, the domain must
+be assigned to a hosting package. With the free web hosting, a hosting
+package will be created for the domain, so you would be able to access and
+use our DKIM tool."*
 
-That second half is the whole risk. Section 4a: the email screens live on
-the domain **only while no hosting is attached**, so attaching a package
-moves email management into the package. Whether the existing mailbox
-migrates cleanly or has to be recreated is not documented anywhere, and
-finding out by trying it, days before onboarding 91 members, is not the
-time. Get it in writing first.
+So there is no mailbox-only route to DKIM. **Free Web Hosting** (on the
+Manage Domain Names screen, alongside Add Hosting Package) is the way in,
+and it costs nothing.
 
-If 20i cannot sign at all without a package, the honest fallback is to send
-the membership mailouts through a service that does DKIM properly rather
-than to bend the mail hosting around it (section 5d).
+⚠️ **They did not answer the second question**, the one that actually
+carried the risk: whether attaching the package preserves the existing
+`info@` mailbox. The reply was "try it and let us know if there are
+issues", which is not a guarantee. And there is a second hazard neither
+side raised in the ticket: **attaching a hosting package normally makes the
+host write its own A records for the domain**, which would take the apex off
+GitHub Pages and drop the website.
 
-For reference, when the DomainKeys tool *is* reachable it works like this:
+Mitigating both is cheap, so do that rather than seek a better answer:
+
+- `dns-snapshot-2026-09-02.txt` at the repo root is a full pre-change dump
+  of the zone taken from `ns1.stackdns.com`. If the package overwrites
+  anything, the correct values are in there and DNS is editable directly in
+  Manage DNS, so a rollback is minutes.
+- The mailbox itself was created 1 Sep 2026 and holds about a day of mail,
+  so the data at risk is close to nothing. It is the *address* working that
+  matters, and a mailbox can be recreated.
+
+**Check order after taking the free package, before touching DKIM:** apex A
+records still the four `185.199.x.153`, apex MX still `mx.stackmail.com`,
+apex TXT still one SPF, `https://barna.co.uk` still 200, and
+`info@barna.co.uk` still listed and still able to receive. Only once all of
+that passes is it safe to go on to the DomainKeys tool.
+
+#### The tool, once the package exists
 
 - Selector: any name will do. `default` is fine.
 - Click **Add Signature**. Because the nameservers are 20i's own
