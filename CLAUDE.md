@@ -225,7 +225,8 @@ Live codes:
 - `BARNA-COMP-9F4TQ2` — 100% off, Forever, capped at 5 redemptions and
   expiring 30 Nov 2026. Comp/testing access. **Deliberately capped and
   dated so a leak cannot become permanent — keep those limits on it.**
-- **Student code — ✅ CREATED AND LIVE, 2 Sep 2026.** The `<!-- EDIT -->`
+- **Student code — ✅ CREATED, LIVE AND TESTED, 2 Sep 2026.** Built to the
+  spec below in **Live** mode and confirmed working at a real checkout. The `<!-- EDIT -->`
   comments on `index.html` and `members.html` warning that checkout could
   not honour the offer have been removed, since it now can. The spec it was
   built to:
@@ -318,7 +319,8 @@ that date itself, we built it:
   whole import is confirmed British format, which was the most dangerous
   silent failure available here.
   Earliest expiry is 30 Oct 2026, so the first real removals are about
-  eight weeks out. Live mode re-armed after the dry run.
+  eight weeks out. `EXPIRY_CHECK_LIVE_MODE` was set back to `true` after
+  the dry run, so the job is armed for real from 3 Sep 2026 onwards.
 - **Verified working end to end in Test Mode (Aug 2026):** a member one
   day past expiry had their plan removed by the scheduled run and lost
   members-area access; a member expiring in 2027 was untouched and kept
