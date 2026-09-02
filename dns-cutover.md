@@ -629,6 +629,31 @@ TXT   _dmarc   v=DMARC1; p=none; rua=mailto:info@barna.co.uk
 correct place to start. Tightening to `quarantine` or `reject` is a later
 job, only after confirming legitimate mail passes.
 
+#### ✅ DONE 2 Sep 2026, and verified end to end
+
+`v=DMARC1; p=none; rua=mailto:info@barna.co.uk`, added as a TXT record on
+the name `_dmarc` in Manage DNS. Subdomain names behave correctly in 20i's
+Name field, so this one needed no special handling.
+
+**Proof, from mail-tester.com, 11:10 UTC:** a real message sent from
+`info@barna.co.uk` through Outlook scored **10/10** with all three passing:
+
+| Check | Result |
+|---|---|
+| SPF | `Pass (mailfrom)`, `client-ip=185.151.28.66`, `helo=relay2.stackmail.com` |
+| DKIM | `dkim=pass`, 2048 bit, `header.d=barna.co.uk`, `header.s=default` |
+| DMARC | `dmarc=pass (p=none dis=none)`, `header.from=barna.co.uk` |
+| SpamAssassin | `-0.1 / 5.0`; relay listed on dnswl.org |
+
+The alignment is the bit that matters: `header.d` equals `header.from`, so
+the signature is the domain's own. That is precisely what Yahoo's 550 was
+demanding.
+
+One cosmetic note from the same report: `MIME_HTML_ONLY`, +0.1, meaning
+Outlook sent HTML with no plain text alternative. Harmless at this score,
+but worth turning on a plain text part for a mailout to the whole
+membership.
+
 ### 5c. Check it
 
 ```
@@ -1022,14 +1047,13 @@ is no self-serve route, so this ticket is the next step and not a fallback.
 > Mike
 
 **Also outstanding:**
-- ~~DKIM for the `info@` mailbox~~ **done 2 Sep 2026** (section 5a).
-  Still to do: DMARC, then a real test send, then re-send to the twelve
-  members who bounced.
+- ~~DKIM and DMARC for the `info@` mailbox~~ **done 2 Sep 2026**, verified
+  10/10 at mail-tester with SPF, DKIM and DMARC all passing (section 5).
+  Only remaining step: re-send to the twelve members who bounced.
 - Memberstack custom email sender + its DKIM records (section 4).
 - Onboard the ~91 legacy members onto Manual Access with `accessexpiresat`
   dates. Possible today via Memberstack's default sender, but better after
   the custom sender exists.
-- DMARC (section 5b) — required by Yahoo and Google, not optional.
 - Retire the old Weebly site.
 - **Get the old reseller's 20i hosting package deleted.** It still holds a
   working copy of the pre-Weebly 2012 site, which surfaced publicly during
