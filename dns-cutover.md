@@ -380,19 +380,116 @@ That, not the green tick in Memberstack, is what the whole exercise is for.
 
 ---
 
-## 5. DMARC (currently missing)
+## 5. DKIM and DMARC for mail sent from `info@` (the Yahoo bounce)
 
-The domain has SPF but no DMARC, which weakens deliverability and
-leaves the domain easier to spoof. Add once the mail setup is settled
-and working, not before:
+### What happened, 2 Sep 2026
+
+A mailout to the members from `info@barna.co.uk` hard-bounced for twelve
+recipients with a 550 at `RCPT TO`:
+
+```
+550-"Please enable DKIM for your domain. Yahoo requires all senders to
+550 authenticate with DKIM - https://senders.yahooinc.com/best-practices/"
+```
+
+Every one of the twelve was `yahoo.com`, `yahoo.co.uk`, `aol.com` or
+`sky.com`. That is one platform, not four: Yahoo runs AOL's and Sky's mail.
+So this is a single provider refusing the domain, not a scatter of unrelated
+failures, and everyone else received the mail normally.
+
+**Nothing is wrong with the mailbox, the message or 20i's relay.** Since
+February 2024 Yahoo and Google require senders to authenticate with SPF
+*and* DKIM and to publish a DMARC record. `barna.co.uk` has SPF and neither
+of the other two. The rejection arriving at `RCPT TO`, before the message
+body is ever transmitted, is the tell: it is a policy check on the sending
+domain, nothing to do with content.
+
+Confirmed by `dig` on 2 Sep 2026:
+
+| Record | State |
+|---|---|
+| apex SPF | present, exactly one record, unchanged |
+| DKIM | **none** — no selector resolves on the domain |
+| `_dmarc` | **none** |
+
+⚠️ **`resend._domainkey.barna.co.uk` does not count.** It exists and it is
+correct, but it signs mail *Memberstack* sends through Resend from
+`send.barna.co.uk` (section 4b). Mail Mike sends from the `info@` mailbox
+leaves through StackMail's relay and is signed by nothing. Two different
+senders need two different DKIM keys. Do not read the Resend record as
+"DKIM is done".
+
+### 5a. Turn on DKIM signing at 20i
+
+20i's own documentation puts the tool at **Manage Hosting → the package →
+Email → DomainKeys**. **BARNA deliberately has no hosting package**
+(section 4a), so that path may simply not exist in the panel.
+
+Look first on the same screen the mailbox lives on:
+
+**Manage Domain Names → `barna.co.uk` → Options → Manage**, then look for
+**DomainKeys** or **DKIM** in the Email section, next to Email Accounts.
+
+- Selector: any name will do. `default` is fine.
+- Click **Add Signature**. Because the nameservers are 20i's own
+  (`ns1-4.stackdns.com`), 20i writes the TXT record into the zone itself.
+- Signing starts on the next message sent; DNS then has to resolve before
+  Yahoo will accept it.
+
+⚠️ **If DomainKeys is not on that screen, raise a ticket — do not buy a
+hosting package to get at it.** Section 4a: attaching a package moves email
+management *into* the package, so it changes the route as well as the bill,
+and the mailbox screen disappears from the domain. 20i support moved DNS
+authority in minutes on 1 Sep 2026 when asked; ask them to enable DKIM
+signing for outbound StackMail on a mailbox-only domain and to publish the
+record.
+
+⚠️ **Verify the record actually landed.** The 20i DNS editor's silent
+no-save (section 4a) and the split-authority problem (section 4b) both bit
+this domain already. Use the SOA serial check, not patience.
+
+### 5b. Then add DMARC
+
+Previously filed here as optional. It is not: Yahoo and Google both want a
+DMARC record present alongside SPF and DKIM. Add it once DKIM is signing
+and verified, not before, or a strict policy could start failing legitimate
+mail.
 
 ```
 TXT   _dmarc   v=DMARC1; p=none; rua=mailto:info@barna.co.uk
 ```
 
 `p=none` only monitors and changes nothing about delivery, which is the
-correct place to start. Tightening to `quarantine` or `reject` is a
-later job, only after confirming legitimate mail passes.
+correct place to start. Tightening to `quarantine` or `reject` is a later
+job, only after confirming legitimate mail passes.
+
+### 5c. Check it
+
+```
+dig +short TXT default._domainkey.barna.co.uk   # or whatever selector was used
+dig +short TXT _dmarc.barna.co.uk
+dig +short TXT barna.co.uk                      # still exactly ONE SPF record
+dig +short MX  barna.co.uk                      # still 10 mx.stackmail.com
+```
+
+The last two lines are the safety check from section 2, and they matter
+here too: a DKIM change should not touch the apex SPF or MX at all.
+
+Then send a real test to a `yahoo.co.uk` address and to a Gmail address.
+In Gmail, **Show original** must report `PASS` for SPF, DKIM *and* DMARC.
+That, not a green tick in the 20i panel, is the proof.
+
+Finally, re-send to the twelve that bounced. They received nothing at all,
+so they are not duplicates.
+
+### 5d. Worth knowing for the next mailout
+
+The twelve bounces are the visible part. Mail that is accepted is not
+necessarily mail that reaches an inbox, and an unauthenticated domain
+sending to ninety-odd recipients at once from a shared mailbox is the exact
+pattern spam filters are built to catch. DKIM and DMARC fix the hard
+failures; for regular mailouts to the whole membership a proper bulk sender
+with unsubscribe handling is the better long-term answer than webmail.
 
 ---
 
@@ -415,7 +512,8 @@ Doing these one at a time makes it obvious what broke if something does.
    confirm you can send and receive from it.
 7. Add Memberstack's DKIM records, verify the sender in their dashboard,
    and send a test signup to confirm the welcome email arrives.
-8. Add DMARC.
+8. Turn on DKIM for the `info@` mailbox at 20i, then add DMARC
+   (section 5). Yahoo, AOL and Sky reject the domain outright without it.
 9. Retire the old Weebly site.
 
 Note this reverses the original advice, which put the website move last
@@ -723,11 +821,14 @@ the mailbox is about deliverability rather than possibility. It is first in
 the list because a bulk onboarding is exactly when spam-foldering hurts.
 
 **Also outstanding:**
+- **DKIM for the `info@` mailbox (section 5).** Now urgent rather than
+  tidy: as of 2 Sep 2026 Yahoo, AOL and Sky reject mail from the domain
+  outright. Twelve members bounced on the first real mailout.
 - Memberstack custom email sender + its DKIM records (section 4).
 - Onboard the ~91 legacy members onto Manual Access with `accessexpiresat`
   dates. Possible today via Memberstack's default sender, but better after
   the custom sender exists.
-- DMARC (section 5).
+- DMARC (section 5b) — required by Yahoo and Google, not optional.
 - Retire the old Weebly site.
 
 **Small, independent:**

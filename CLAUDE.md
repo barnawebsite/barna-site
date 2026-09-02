@@ -329,6 +329,17 @@ no admin route to "just set a password" for someone. Consequences:
   and the apex SPF are both untouched and no SPF merge is needed
   (confirmed 1 Sep 2026). Section 4 of `dns-cutover.md` has the exact
   records and the dig checks that prove mail still works.
+- **Mail sent from `info@barna.co.uk` itself has no DKIM** (found 2 Sep
+  2026 when a members mailout hard-bounced for every Yahoo, AOL and Sky
+  address: *"Yahoo requires all senders to authenticate with DKIM"*). The
+  `resend._domainkey` record in the zone does **not** cover this — that
+  signs Memberstack's mail from `send.barna.co.uk`, not mail leaving the
+  mailbox through StackMail. Fix is 20i's DomainKeys tool plus a `_dmarc`
+  record; the catch is that 20i documents DomainKeys under a hosting
+  package and BARNA deliberately has none, so it may need a support
+  ticket rather than a purchase. **Never buy a package to reach it**
+  without checking — a package moves email management off the domain
+  screen. Full write-up and the dig checks: section 5 of `dns-cutover.md`.
 - Judgement call for the 91: sending from `memberstack.io` works, but
   Memberstack has a known issue with verification and welcome mail landing
   in spam. For a one-off bulk onboarding of 91 people, set up the custom
