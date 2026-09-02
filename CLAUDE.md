@@ -274,10 +274,21 @@ that date itself, we built it:
 - **Onboarding happened by hand, 2 Sep 2026: 81 members are live in
   Memberstack.** Email verification was turned off first, and the welcome
   mailout went to all 81 (the twelve Yahoo/AOL/Sky bounces from that send
-  are what surfaced the missing DKIM). Roughly 10 more are still to add,
-  held up on confirming their real expiry dates. The planned import script
+  are what surfaced the missing DKIM). The planned import script
   was never needed and is not worth writing now.
-  ⚠️ **The consequence is that `scripts/check_member_expiry.py` now has 81
+- **Second batch, same day: 7 more imported, so 88 are live.** These were
+  seven of the twelve originally held back for having an expiry date within
+  weeks of onboarding; Mike reviewed the list and decided they were fine to
+  add at their real dates. Run with
+  `import_legacy_members.py --only <the 7 emails> --log _member-list/import-log-batch2.csv`
+  — `--only` and a separate log keep the original 81-row `import-log.csv`
+  intact. All 7 created with the plan and their dates read back correctly.
+  They still need the same welcome email (Version C) as the other 81; the
+  BCC list is `_member-list/send-batch2-bcc.txt`.
+  **5 remain held back** (four that looked already lapsed, one with an
+  ambiguous date), listed in `_member-list/held-back.txt`. They have no
+  Memberstack account at all.
+  ⚠️ **The consequence is that `scripts/check_member_expiry.py` now has 88
   real members to act on.** Its 35 green runs to date prove only that the
   script executed, not that it was pointed at live data. Verify with a
   manual DRY RUN before trusting it, and check `MEMBERSTACK_SECRET_KEY` is
@@ -311,15 +322,18 @@ that date itself, we built it:
   Live Admin API key, a dry run reported 81 on the Manual Access plan,
   `WOULD REMOVE (0)`, 70 staying, 11 open-ended (`never`, the board), and
   **an empty NEEDS MANUAL CHECK**. 70 + 11 = 81, so every member is
-  accounted for and every date parsed.
+  accounted for and every date parsed. Re-run after the second batch the
+  same day: 88 on the plan, `WOULD REMOVE (0)`, 77 staying, the same 11
+  open-ended, manual-check list still empty. 77 + 11 = 88.
   That empty manual list is the meaningful result: `parse_uk_date` splits
   strictly on `DD/MM/YYYY` and returns `None` for anything else. Better
   still, many dates have a day above 12 (`27/04/2027`, `31/07/2027`), which
   would have failed as "month 27" had the source been US format. So the
   whole import is confirmed British format, which was the most dangerous
   silent failure available here.
-  Earliest expiry is 30 Oct 2026, so the first real removals are about
-  eight weeks out. `EXPIRY_CHECK_LIVE_MODE` was set back to `true` after
+  Earliest expiry was 30 Oct 2026, but the second batch moved it forward:
+  Jon Sions and Sarah Sirengo expire **29 Sep 2026**, so the first real
+  removals are about four weeks out, not eight. `EXPIRY_CHECK_LIVE_MODE` was set back to `true` after
   the dry run, so the job is armed for real from 3 Sep 2026 onwards.
 - **Verified working end to end in Test Mode (Aug 2026):** a member one
   day past expiry had their plan removed by the scheduled run and lost
@@ -418,7 +432,7 @@ What is still true, and still matters:
    confuse and one does not imply the other.
    **Swap order matters:** set `EXPIRY_CHECK_LIVE_MODE` to `false` *before*
    pasting the Live key. Otherwise the job goes from seeing 1 test member to
-   acting on 81 real ones at the next 07:00 run, with nobody having read the
+   acting on 88 real ones at the next 07:00 run, with nobody having read the
    dates.
 3. ~~Confirm the **`accessexpiresat`** custom field exists in Live.~~ Done,
    1 Sep 2026: it saves and reads back correctly on a real live member, and
