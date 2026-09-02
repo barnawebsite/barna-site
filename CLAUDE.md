@@ -300,33 +300,22 @@ that date itself, we built it:
   manual DRY RUN before trusting it, and check `MEMBERSTACK_SECRET_KEY` is
   a Live key: a Test key makes the job report success every morning while
   looking at an empty account.
-- `scripts/sync_from_member_sheet.py` is the ongoing route from the
-  membership secretary's own `ACTIVE MEMBERS` sheet on the BARNA Google Drive
-  into Memberstack, decided with Mike 2 Sep 2026. She keeps maintaining the
-  sheet she has always maintained; Mike exports it (File → Download → CSV) and
-  runs this. Dry run by default, `MEMBER_SYNC_LIVE_MODE=true` to apply.
-  It **creates** people in the sheet but not on the site and **updates** dates
-  she has changed. It **never removes anybody** — someone deleted from the
-  sheet is reported and left alone, because revoking access belongs to the
-  expiry job or a human.
-  Parsing is `prepare_member_import.py` and writing is
-  `import_legacy_members.py`, both called as subprocesses so there is one
-  tested copy of each; this script only decides what needs doing.
-  ⚠️ **Two of prepare's onboarding-day rules must not apply on a sync**, and
-  the script overrides both. It runs prepare with `--include-flagged` and
-  re-decides what blocks:
-  1. "expires soon after onboarding" is **not** blocking here. It was right
-     when creating 93 accounts at once; on a sync it would refuse a genuine
-     renewal purely for being close.
-  2. **the grace year IS blocking here.** prepare gives anyone already lapsed
-     twelve more months, which was Mike's deliberate one-off call so that
-     people were not created and stripped the next morning. Applied silently
-     on every sync it would quietly extend access for someone who has stopped
-     paying, so it is held for a person to decide.
-  Also blocking: unreadable or ambiguous dates, invalid emails, and **both**
-  rows of a duplicated email (prepare flags only the second, and picking
-  whichever came first would be a guess). Blocked rows go to
-  `_member-list/needs-review.txt` and are never written to Memberstack.
+- **From Sep 2026 Memberstack is the only place a membership can start.**
+  Joining happens on the website, through the signup modal and Stripe, so
+  nothing new ever originates in the membership secretary's `ACTIVE MEMBERS`
+  sheet. That sheet is now a historical record of the pre-website membership,
+  not a source of truth.
+  A script to sync her sheet into Memberstack was written on 2 Sep 2026 and
+  **deleted the same day**, on Mike's call, once that became clear. Do not
+  rebuild it. It was solving a problem that only existed during the one-off
+  migration, and it carried real risk: her sheet's "lapsed members get a grace
+  year" rule, applied on a repeating sync, silently extends access for people
+  who have stopped paying. If it is ever genuinely needed again it is in git
+  history at commit `08de602`.
+  What replaces it needs no code. A legacy member whose date passes loses
+  access automatically and rejoins through the website like anyone else. The
+  only manual case left is the handful in `_member-list/held-back.txt`, added
+  by hand in the dashboard if the membership secretary confirms they renewed.
 - `scripts/export_members_xlsx.py` writes the reference spreadsheet Mike
   shares with the membership secretary, reading the **live** member list
   rather than the import CSV, so it cannot drift from what the site
