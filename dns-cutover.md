@@ -654,9 +654,21 @@ much worse than a normal misconfiguration.
 It sits in the old reseller's hosting package, the same one that held DNS
 authority until 1 Sep 2026 (section 4b). It is unreachable unless DNS
 points at it, so it is harmless where it is, and it has no working login:
-its only member link is `members.htm`, a static page with no form. But it
-is one more reason to get that old package deleted rather than left
-lying around.
+its only member link is `members.htm`, a static page with no form.
+
+**Decision, 2 Sep 2026: leave it. Not an oversight.** A ticket was raised
+asking 20i whether it could be removed and what that would touch, then
+dropped without waiting for the answer. The reasoning:
+
+- it is only reachable by pointing DNS at it, and DNS does not
+- the content is archived, so nothing is at risk of being lost
+- removing it means another package operation on this domain, and the last
+  one took the website down. The upside was tidiness; the downside was a
+  second outage in a day.
+
+If it ever does need to go, ask 20i what removing it touches **before**
+authorising anything, and verify the zone against
+`dns-snapshot-2026-09-02-final.txt` afterwards.
 
 ##### ✅ Restored in full, 12:20 the same day
 
@@ -1243,9 +1255,11 @@ is no self-serve route, so this ticket is the next step and not a fallback.
   dates. Possible today via Memberstack's default sender, but better after
   the custom sender exists.
 - Retire the old Weebly site.
-- **Get the old reseller's 20i hosting package deleted.** It still holds a
-  working copy of the pre-Weebly 2012 site, which surfaced publicly during
-  the 2 Sep 2026 outage (section 5a). **Archive it first** — 77 files and
+- ~~Get the old reseller's 20i hosting package deleted~~ **deliberately
+  left in place, 2 Sep 2026** (section 5a). It still holds a working copy
+  of the pre-Weebly 2012 site, which surfaced publicly during that day's
+  outage, but it is unreachable unless DNS points at it and the risk of
+  another package operation outweighed the tidiness. Archived instead — 77 files and
   18 MB were pulled to `~/Desktop/barna-old-site-archive-2026-09-02` on
   2 Sep 2026, including 17 "What's new with BARNA" newsletters from 2008
   to 2012 and the old Standards order forms. Deletion is permanent, and
