@@ -349,6 +349,12 @@ no admin route to "just set a password" for someone. Consequences:
   rejecting again. Note this contradicts the otherwise correct "do NOT buy
   a hosting package" advice in `dns-cutover.md` section 4a: that rule is
   about *email accounts*, and it stands, but DKIM is the one exception.
+  As of 2 Sep 2026 this package also holds **web auth** for the domain, moved
+  off the old Web by Numbers package by 20i support. 20i will not remove that
+  old package (they cannot touch another user's), and it does not matter: it
+  is only reachable if our own zone is broken first. Full write-up, plus
+  `scripts/verify_dns.sh` to check the whole zone in one command, in section
+  5e of `dns-cutover.md`. Run that script after anything 20i touches.
 - ~~**Mail sent from `info@barna.co.uk` itself has no DKIM**~~ **FIXED
   2 Sep 2026.** Selector `default`, 2048 bit, plus a `_dmarc` record.
   Verified 10/10 at mail-tester with SPF, DKIM and DMARC all passing, and

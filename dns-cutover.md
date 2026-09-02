@@ -709,6 +709,82 @@ with unsubscribe handling is the better long-term answer than webmail.
 
 ---
 
+## 5e. The old Web by Numbers package, and what "web auth" actually is (2 Sep 2026)
+
+**Resolved: the old package stays where it is. 20i will not remove it, and it
+no longer matters.**
+
+### The real cause of the 2 Sep exposure
+
+A 20i domain carries three separate authorities that can sit on different
+packages: **DNS auth**, **email auth** and **web auth**. When DNS authority
+for `barna.co.uk` was moved into our account on 1 Sep 2026, our free package
+was given DNS auth and email auth but **not web auth**. Web auth stayed on
+the older Web by Numbers package (registrar tag SYPO) on `185.151.30.226`.
+
+So during the seven minutes on 2 Sep when the zone had been rewritten and the
+apex A records pointed at 20i, requests reached 20i's shared IP, 20i looked up
+which package held web auth for `barna.co.uk`, and served **the agency's 2012
+site**. It was never a DNS record pointing at the old package. Nothing in the
+zone has ever resolved to `185.151.30.226`. The old site was reachable only
+while the apex pointed at 20i at all.
+
+That is why the old package is harmless where it is: it is unreachable unless
+our own zone is broken first.
+
+### What 20i did
+
+20i support (Connor B, 2 Sep 2026) granted **full auth, including web auth,
+to our own package**, and stated plainly that they **cannot delete, disable or
+change another 20i user's package** unless that user requests it. Removing the
+Web by Numbers package is therefore not available to us at all; it would mean
+going to Web by Numbers directly. Not worth doing.
+
+The useful side effect: web auth for `barna.co.uk` now points at *our* empty
+package. If the zone is ever accidentally repointed at 20i again, visitors get
+20i's blank "This site is brand new" holding page rather than a resurrected
+2012 BARNA site. Confirmed by hand:
+
+```
+curl -s -H "Host: barna.co.uk" http://185.151.30.226 | grep -o '<title>.*</title>'
+   ->  <title>This site is brand new</title>
+```
+
+A full copy of the old site was archived first anyway: 77 files, 18 MB, at
+`~/Desktop/barna-old-site-archive-2026-09-02`. It is not in this repo.
+
+### ⚠️ The thing to keep watching
+
+20i's reply ended with "your website will begin displaying within the noted
+timeframe." **It will not, and it must not.** The website is on GitHub Pages
+on purpose. A support agent acting on that belief could try to "fix" it by
+adding A, AAAA or wildcard records pointing at 20i, which is precisely the
+change that took the site down on 2 Sep. 20i's automatic diagnostics reporting
+**"no web records found" is the correct and expected result**, not a fault.
+
+Granting web auth did **not** rewrite the zone: verified every two minutes
+across the full 30 minute propagation window with `scripts/verify_dns.sh`, all
+clean. But attaching the package *did* rewrite it on 2 Sep, so treat every 20i
+package operation on this domain as a live risk and run the script afterwards.
+
+### `scripts/verify_dns.sh`
+
+One command, checks the whole zone against
+`dns-snapshot-2026-09-02-final.txt` and the live site:
+
+```
+./scripts/verify_dns.sh
+```
+
+Apex A is the four GitHub IPs; no AAAA; no wildcard A or AAAA; MX
+`10 mx.stackmail.com`; exactly one SPF ending `~all`; `default._domainkey`,
+`_dmarc`, `resend._domainkey` and the `send.` MX all present; `www` still a
+CNAME; nothing resolving to `185.151.30.226`; and `barna.co.uk` and
+`www.barna.co.uk` both returning 200 from a `185.199.*` GitHub address. Exit
+code 0 means clean, 1 means drift. Run it after anything 20i touches.
+
+---
+
 ## 6. Suggested order
 
 Doing these one at a time makes it obvious what broke if something does.
