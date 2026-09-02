@@ -270,6 +270,18 @@ that date itself, we built it:
   membership cancel them if they never renew. This is the one deliberate
   exception to "no free extra months" above; those rows are marked CANCEL in
   the import file's `review_note` column.
+- **Onboarding happened by hand, 2 Sep 2026: 81 members are live in
+  Memberstack.** Email verification was turned off first, and the welcome
+  mailout went to all 81 (the twelve Yahoo/AOL/Sky bounces from that send
+  are what surfaced the missing DKIM). Roughly 10 more are still to add,
+  held up on confirming their real expiry dates. The planned import script
+  was never needed and is not worth writing now.
+  ⚠️ **The consequence is that `scripts/check_member_expiry.py` now has 81
+  real members to act on.** Its 35 green runs to date prove only that the
+  script executed, not that it was pointed at live data. Verify with a
+  manual DRY RUN before trusting it, and check `MEMBERSTACK_SECRET_KEY` is
+  a Live key: a Test key makes the job report success every morning while
+  looking at an empty account.
 - Onboarding the legacy members is two scripts, both dry run by default:
   `scripts/prepare_member_import.py` turns a CSV export of Mike's member
   spreadsheet into a flat import file, and `scripts/import_legacy_members.py`
