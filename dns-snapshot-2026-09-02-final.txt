@@ -1,0 +1,47 @@
+# barna.co.uk zone snapshot, KNOWN GOOD, taken 2026-09-02 11:21 UTC from ns1.stackdns.com
+# This is the state to restore to if anything overwrites the zone.
+# Verified identical on ns1-4 and on Cloudflare, Google, Quad9 and OpenDNS.
+
+SOA:
+ns1.stackdns.com. hostmaster.stackdns.com. 1788347995 1800 900 1209600 300
+
+apex A (all four GitHub Pages IPs):
+185.199.108.153
+185.199.109.153
+185.199.110.153
+185.199.111.153
+
+apex AAAA: none. CORRECT. Do not add - a 20i hosting package adds one and breaks the site over IPv6.
+
+wildcard *: none. CORRECT. Do not add.
+
+apex MX:
+10 mx.stackmail.com.
+
+apex TXT (SPF) - exactly one record, must end ~all:
+"v=spf1 include:spf.stackmail.com a mx ~all"
+
+DKIM default._domainkey (StackMail outbound, created 2 Sep 2026):
+"v=DKIM1;k=rsa;h=sha256;n=;s=*;t=s;p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvnZdBq57Qv20kRzU5q4dUgGPQ6Wufss8ozyzOMVBMTwaRtcH1XlN8n/3tVQisoUBXKouJt2RMEdOUeN/AG/FyymDXdtfBtb62fHXxrtUNGhVcqVYfH18UrlJSHUTxd5S/G6htT4AZywNN+ow8pyS3JFBiAB4ZQee0HU30CrU7f4vVYJ" "TVYlz/lGHH8SOYgWGyCb0BCuUmHS7vBDk5mPOA70WNFNGWQ97/f/j2aVES/Cso88/gxS3DdbfXo6dXGOSqgezSJYP+TW5waGiN7CkQoQpjh10KfRzqRVvRfQWkwaMlU5JI16NkiUefkvnc/15LdJqRGV2ZNXxmkWdzeGMowIDAQAB"
+
+DMARC _dmarc:
+"v=DMARC1; p=none; rua=mailto:info@barna.co.uk"
+
+www:
+barnawebsite.github.io.
+  (CNAME on purpose - inherits all four GitHub IPs. Never add an A record here.)
+
+mail + hosting CNAMEs:
+autodiscover  autodiscover.stackmail.com.
+ftp           ftp.gb.stackcp.com.
+imap          imap.stackmail.com.
+mail          mail.stackmail.com.
+pop3          pop3.stackmail.com.
+smtp          smtp.stackmail.com.
+
+send.barna.co.uk (Memberstack via Resend):
+  MX  10 feedback-smtp.us-east-1.amazonses.com.
+  TXT "v=spf1 include:amazonses.com ~all"
+
+resend._domainkey (Memberstack's own DKIM, NOT the mailbox's):
+"p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDO4EFEWo7WjIUmtm/Qf+RmoUsUBFEU6+yYmLTBFPe+nPE5bmMD8iWPOxQfXQNJBLH2pfFfXVu2/CKmor8rtMUFvizQP2BUGBV8vIESf8Edw12qywcT0+PstJkfDMZ4Y4rbEKQE1rQ5SWidLoY3niEwsiQGo+k46EciCQemFv6R7wIDAQAB"

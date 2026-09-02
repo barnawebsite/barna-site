@@ -565,6 +565,23 @@ its only member link is `members.htm`, a static page with no form. But it
 is one more reason to get that old package deleted rather than left
 lying around.
 
+##### ✅ Restored in full, 12:20 the same day
+
+All four GitHub A records are back on the apex, entered with the **Name
+field left completely blank**. That is the answer to section 10's gotcha 4:
+blank works, and no support ticket was needed. Typing `barna.co.uk` is what
+produces the junk `barna.co.uk.barna.co.uk` record; leaving it empty does
+not. Verified afterwards that no junk record was created.
+
+`dns-snapshot-2026-09-02-final.txt` is the known good state to restore to.
+
+**`www` needs no A record and must never be given one.** It is a CNAME, and
+DNS forbids a name having both a CNAME and an A record, so adding one would
+break `www` rather than add redundancy. It already inherits all four GitHub
+IPs by following the CNAME. The apex is different only because the top of a
+zone cannot be a CNAME, which is also why the apex is the part a hosting
+package is able to hijack.
+
 ##### If the package is ever removed or re-added, re-check the zone
 
 The rewrite happened on attach with no warning and no prompt. Assume any
@@ -1060,6 +1077,7 @@ is no self-serve route, so this ticket is the next step and not a fallback.
   the 2 Sep 2026 outage (section 5a).
 
 **Small, independent:**
+- ~~Re-add the three redundancy apex A records~~ done 2 Sep 2026.
 - Rotate the `info@barna.co.uk` mailbox password. It was exposed in a
   screenshot on 1 Sep 2026 and deliberately kept for now to avoid
   reconfiguring Outlook mid-setup. Changing it means updating the IMAP and
