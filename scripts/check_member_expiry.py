@@ -143,12 +143,18 @@ def main():
           f"{len(to_remove) + len(to_keep) + len(to_never) + len(to_check)}")
     print()
 
+    # Soonest first. Memberstack stores accessexpiresat as DD/MM/YYYY text, so
+    # the dashboard sorts that column by day-of-month and is no use for seeing
+    # who is due next. These lists are the readable version of that.
+    to_remove.sort(key=lambda r: r[3])
+    to_keep.sort(key=lambda r: r[1])
+
     print(f"{'REMOVING' if LIVE else 'WOULD REMOVE'} ({len(to_remove)}):")
     for email, member_id, conn_id, expiry in to_remove:
         print(f"  - {email}  (expired {expiry.isoformat()})")
 
     print()
-    print(f"OK, staying ({len(to_keep)}):")
+    print(f"OK, staying ({len(to_keep)}), soonest expiry first:")
     for email, expiry in to_keep:
         print(f"  - {email}  (expires {expiry.isoformat()})")
 
