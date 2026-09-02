@@ -285,10 +285,15 @@ that date itself, we built it:
   intact. All 7 created with the plan and their dates read back correctly.
   They still need the same welcome email (Version C) as the other 81; the
   BCC list is `_member-list/send-batch2-bcc.txt`.
-  **5 remain held back** (four that looked already lapsed, one with an
-  ambiguous date), listed in `_member-list/held-back.txt`. They have no
-  Memberstack account at all.
-  ⚠️ **The consequence is that `scripts/check_member_expiry.py` now has 88
+- **Third batch, same day: Gerrylou Marie Sobczyk, so 89 are live.** Hers was
+  the ambiguous date; Mike confirmed it as 9 Aug 2027, which is exactly what
+  `prepare_member_import.py` had already inferred by reading
+  `'8/9/2026 11:41:51'` as US month/day. Log
+  `_member-list/import-log-batch3.csv`, welcome email note
+  `_member-list/send-batch3-bcc.txt`.
+  **4 remain held back**, all of them ones that looked already lapsed, listed
+  in `_member-list/held-back.txt`. They have no Memberstack account at all.
+  ⚠️ **The consequence is that `scripts/check_member_expiry.py` now has 89
   real members to act on.** Its 35 green runs to date prove only that the
   script executed, not that it was pointed at live data. Verify with a
   manual DRY RUN before trusting it, and check `MEMBERSTACK_SECRET_KEY` is
@@ -324,7 +329,8 @@ that date itself, we built it:
   **an empty NEEDS MANUAL CHECK**. 70 + 11 = 81, so every member is
   accounted for and every date parsed. Re-run after the second batch the
   same day: 88 on the plan, `WOULD REMOVE (0)`, 77 staying, the same 11
-  open-ended, manual-check list still empty. 77 + 11 = 88.
+  open-ended, manual-check list still empty. 77 + 11 = 88. And again after
+  the third: 89 on the plan, 78 staying, same 11, still nothing to check.
   That empty manual list is the meaningful result: `parse_uk_date` splits
   strictly on `DD/MM/YYYY` and returns `None` for anything else. Better
   still, many dates have a day above 12 (`27/04/2027`, `31/07/2027`), which
@@ -432,7 +438,7 @@ What is still true, and still matters:
    confuse and one does not imply the other.
    **Swap order matters:** set `EXPIRY_CHECK_LIVE_MODE` to `false` *before*
    pasting the Live key. Otherwise the job goes from seeing 1 test member to
-   acting on 88 real ones at the next 07:00 run, with nobody having read the
+   acting on 89 real ones at the next 07:00 run, with nobody having read the
    dates.
 3. ~~Confirm the **`accessexpiresat`** custom field exists in Live.~~ Done,
    1 Sep 2026: it saves and reads back correctly on a real live member, and
