@@ -1064,9 +1064,11 @@ is no self-serve route, so this ticket is the next step and not a fallback.
 > Mike
 
 **Also outstanding:**
-- ~~DKIM and DMARC for the `info@` mailbox~~ **done 2 Sep 2026**, verified
-  10/10 at mail-tester with SPF, DKIM and DMARC all passing (section 5).
-  Only remaining step: re-send to the twelve members who bounced.
+- ~~DKIM and DMARC for the `info@` mailbox~~ **✅ CLOSED 2 Sep 2026.**
+  10/10 at mail-tester with SPF, DKIM and DMARC all passing, and the
+  twelve members who hard-bounced that morning were re-sent to and all
+  delivered, with no bounces. Yahoo, AOL and Sky now accept mail from
+  `barna.co.uk`. Section 5 has the whole story.
 - Memberstack custom email sender + its DKIM records (section 4).
 - Onboard the ~91 legacy members onto Manual Access with `accessexpiresat`
   dates. Possible today via Memberstack's default sender, but better after
