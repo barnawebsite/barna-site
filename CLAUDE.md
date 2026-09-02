@@ -329,7 +329,19 @@ no admin route to "just set a password" for someone. Consequences:
   and the apex SPF are both untouched and no SPF merge is needed
   (confirmed 1 Sep 2026). Section 4 of `dns-cutover.md` has the exact
   records and the dig checks that prove mail still works.
-- **Mail sent from `info@barna.co.uk` itself has no DKIM** (found 2 Sep
+- ⚠️ **The free 20i hosting package on `barna.co.uk` must stay.** It looks
+  like unused clutter (the website is on GitHub Pages and needs no
+  hosting), but **DKIM signing for outbound mail lives on it** — 20i only
+  exposes the DomainKeys tool on a package. Cancel it and mail from
+  `info@` silently stops being signed, and Yahoo, AOL and Sky start
+  rejecting again. Note this contradicts the otherwise correct "do NOT buy
+  a hosting package" advice in `dns-cutover.md` section 4a: that rule is
+  about *email accounts*, and it stands, but DKIM is the one exception.
+- ~~**Mail sent from `info@barna.co.uk` itself has no DKIM**~~ **FIXED
+  2 Sep 2026.** Selector `default`, 2048 bit, plus a `_dmarc` record.
+  Verified 10/10 at mail-tester with SPF, DKIM and DMARC all passing, and
+  the twelve members who hard-bounced were re-sent to and all delivered.
+  Kept here because the cause is worth remembering: (found 2 Sep
   2026 when a members mailout hard-bounced for every Yahoo, AOL and Sky
   address: *"Yahoo requires all senders to authenticate with DKIM"*). The
   `resend._domainkey` record in the zone does **not** cover this — that

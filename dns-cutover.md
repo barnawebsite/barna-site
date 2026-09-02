@@ -551,6 +551,14 @@ sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder
 The fastest way to prove the site is actually fine, for anyone who reports
 it broken: load it on a phone with wifi off. Different resolver, no cache.
 
+##### ⚠️ Never cancel BARNA's own free hosting package
+
+It carries no website and looks like clutter worth tidying. It is not:
+**DKIM signing runs on it.** 20i exposes the DomainKeys tool only on a
+package, so removing the package removes the signing, and Yahoo, AOL and
+Sky go back to rejecting every message. The DNS record would survive and
+would make everything look correct while mail arrived unsigned.
+
 ##### ⚠️ The old 2012 site is still live in the old reseller's 20i package
 
 `185.151.30.226` does not serve a holding page. It serves the **original
@@ -1076,7 +1084,12 @@ is no self-serve route, so this ticket is the next step and not a fallback.
 - Retire the old Weebly site.
 - **Get the old reseller's 20i hosting package deleted.** It still holds a
   working copy of the pre-Weebly 2012 site, which surfaced publicly during
-  the 2 Sep 2026 outage (section 5a).
+  the 2 Sep 2026 outage (section 5a). **Archive it first** — 77 files and
+  18 MB were pulled to `~/Desktop/barna-old-site-archive-2026-09-02` on
+  2 Sep 2026, including 17 "What's new with BARNA" newsletters from 2008
+  to 2012 and the old Standards order forms. Deletion is permanent, and
+  some of those documents carry personal details, so keep the archive out
+  of this public repo.
 
 **Small, independent:**
 - ~~Re-add the three redundancy apex A records~~ done 2 Sep 2026.
