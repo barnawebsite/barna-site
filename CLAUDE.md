@@ -283,14 +283,15 @@ that date itself, we built it:
   `import_legacy_members.py --only <the 7 emails> --log _member-list/import-log-batch2.csv`
   — `--only` and a separate log keep the original 81-row `import-log.csv`
   intact. All 7 created with the plan and their dates read back correctly.
-  They still need the same welcome email (Version C) as the other 81; the
-  BCC list is `_member-list/send-batch2-bcc.txt`.
+  They were sent the same welcome email (Version C) as the other 81 on the
+  same day; the BCC list used is `_member-list/send-batch2-bcc.txt`.
 - **Third batch, same day: Gerrylou Marie Sobczyk, so 89 are live.** Hers was
   the ambiguous date; Mike confirmed it as 9 Aug 2027, which is exactly what
   `prepare_member_import.py` had already inferred by reading
   `'8/9/2026 11:41:51'` as US month/day. Log
   `_member-list/import-log-batch3.csv`, welcome email note
-  `_member-list/send-batch3-bcc.txt`.
+  `_member-list/send-batch3-bcc.txt`. She was sent Version C too.
+  **All 89 have now had the welcome email — do not send it again.**
   **4 remain held back**, all of them ones that looked already lapsed, listed
   in `_member-list/held-back.txt`. They have no Memberstack account at all.
   ⚠️ **The consequence is that `scripts/check_member_expiry.py` now has 89
