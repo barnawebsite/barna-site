@@ -273,6 +273,91 @@ appear to live under the same domain management screen and to sit outside
 the one-mailbox limit, but that was not confirmed against a live account,
 so check it rather than promising anyone an address.
 
+### 4d. Two people on `info@` (Michele and Claire, Sep 2026)
+
+Requirement: mail to `info@barna.co.uk` reaches **both** people, and **both**
+can reply *as* `info@`, not from their personal addresses.
+
+#### Use shared IMAP, not forwarding
+
+Forwarding only solves half of it. A forward drops a copy in a personal inbox;
+hitting reply there sends from that personal address. Replying *as* `info@`
+needs the mailbox's own SMTP credentials either way, and once both people have
+those, a shared IMAP account is strictly better than a forward:
+
+- **One inbox, not two copies.** Read and replied state is shared, so you can
+  see Claire has already answered something. Two forwarded copies means two
+  people answering the same enquiry, which is the usual failure of this setup.
+- **One Sent folder**, so there is a single record of what BARNA said.
+- **No forwarding hop.** Forwarded mail arrives at Gmail from StackMail rather
+  than the original sender, which fails SPF at the receiving end and tends to
+  get spam-foldered. Reading the mailbox directly avoids that entirely.
+
+Both people add the same account, with the settings already in 4a above:
+
+| Setting | Value |
+|---|---|
+| Incoming | IMAP, `imap.stackmail.com`, port 993, SSL/TLS |
+| Outgoing | SMTP, `smtp.stackmail.com`, port 465 SSL/TLS (or 587 STARTTLS) |
+| Username | the full address, `info@barna.co.uk` |
+| Password | the mailbox password |
+
+Not `imap.barna.co.uk` / `smtp.barna.co.uk` — those resolve but present a
+`*.stackmail.com` certificate and fail on hostname mismatch. See 4a.
+
+#### ⚠️ The trap: "Send mail as" through Gmail silently unsigns the mail
+
+If either person adds `info@barna.co.uk` to Gmail as a **Send mail as**
+identity, Gmail offers two routes and the wrong one undoes the DKIM work of
+2 Sep 2026:
+
+- ❌ **"Send through Gmail"** — the message leaves Google's servers. SPF for
+  `barna.co.uk` (`include:spf.stackmail.com a mx ~all`) does not authorise
+  Google, so SPF fails; Gmail signs as `gmail.com`, so DKIM does not align
+  with `barna.co.uk` either. DMARC is `p=none` so nothing is rejected
+  outright, but this is **exactly** the unauthenticated pattern that made
+  Yahoo, AOL and Sky hard-bounce twelve members on 2 Sep.
+- ✅ **"Send through smtp.stackmail.com"** — the message leaves 20i, SPF
+  passes, and 20i's DomainKeys signs it with the `default._domainkey` key.
+
+Choose the SMTP route. The same applies to any other client's "alias" or
+"send as" feature: if it does not ask for `smtp.stackmail.com` and the mailbox
+password, it is sending unsigned.
+
+Gmail will email a confirmation code to `info@` to prove ownership. Both
+people can see it, so this is easy.
+
+**Prove it afterwards, per person.** Send one message from each person's
+client to mail-tester.com and confirm SPF, DKIM and DMARC all pass, the same
+check as 5c. A misconfigured client looks completely normal from the sending
+side; the only visible symptom is members not receiving things.
+
+#### ⚠️ Sharing the password has a domain-control consequence
+
+A single StackMail mailbox has one password. There is no per-person
+credential, so Claire gets the same one Michele has. That is workable, but it
+collides with an item still open in section 11: **moving the 20i account login
+to `info@barna.co.uk`.**
+
+Do not do both. If the 20i login is `info@` *and* Claire has the mailbox
+password, Claire can trigger a 20i password reset, read it, and take control
+of the account: the domain, the DNS zone and the mailbox itself. Pick one:
+
+- keep the 20i login on a personal address that only one person reads
+  (simplest, and it is where it already is), **or**
+- move the login to `info@` and do *not* give out the mailbox password.
+
+Whichever way, when someone steps down the mailbox password must be changed
+and re-entered in every client that holds it.
+
+#### If the Email Accounts screen has moved
+
+Section 4a says email management sits on the domain screen **while no hosting
+is attached**. A free package has since been attached to `barna.co.uk` for
+DKIM signing, so the mailbox and forwarder settings may now live inside the
+package instead. Look there before concluding anything is missing, and do not
+detach the package to bring the screen back — DKIM lives on it.
+
 ### 4b. Point Memberstack at it
 
 Memberstack → **Settings → Email Sender Address** → enter
