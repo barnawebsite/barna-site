@@ -385,6 +385,20 @@ What is still true, and still matters:
 2. **API keys are per mode.** Generate a **Live Mode** Admin API key and
    update the `MEMBERSTACK_SECRET_KEY` repo secret. This is the one item
    from the old list that genuinely has to be done.
+   ⚠️ **Confirmed still outstanding on 2 Sep 2026, and it had been silently
+   failing.** The scheduled run that morning reported `Mode: LIVE` but
+   `Members on Manual Access plan: 1` — a single test member,
+   `guestar.it@gmail.com`, from the Test account. Every one of the 35 green
+   runs to that date was checking the test account. **A green tick proves
+   only that the script ran.** The number that matters is the member count:
+   if it is not roughly the real membership, the key is wrong.
+   Note `Mode: LIVE` refers to `EXPIRY_CHECK_LIVE_MODE` and says nothing
+   about which Memberstack account the key points at. The two are easy to
+   confuse and one does not imply the other.
+   **Swap order matters:** set `EXPIRY_CHECK_LIVE_MODE` to `false` *before*
+   pasting the Live key. Otherwise the job goes from seeing 1 test member to
+   acting on 81 real ones at the next 07:00 run, with nobody having read the
+   dates.
 3. ~~Confirm the **`accessexpiresat`** custom field exists in Live.~~ Done,
    1 Sep 2026: it saves and reads back correctly on a real live member, and
    shows as a column in the dashboard. Note it does *not* appear in
