@@ -527,6 +527,44 @@ site came back within minutes, verified against all four `stackdns.com`
 nameservers and five public resolvers, with the Let's Encrypt certificate
 for `barna.co.uk` intact.
 
+##### The fallout lasted longer than the outage, and here is why
+
+The zone was wrong for about seven minutes. People were still seeing the
+wrong site nearly an hour later, which caused more alarm than the outage
+itself.
+
+**Records are handed out with a 3600 second TTL, not the 300 in the SOA.**
+So anyone who loaded the site during the bad window cached it for up to a
+full hour *from their own lookup*, and nothing done at the DNS end speeds
+that up. Budget an hour of tail, and say so up front rather than promising
+a five minute fix.
+
+**The IPv6 record is what makes it stick.** macOS caches in
+`mDNSResponder`, browsers cache on top of that, and Safari prefers IPv6 —
+so `dig` reports the zone as correct while the browser keeps going to 20i.
+The local fix is a flush plus a full quit of the browser:
+
+```
+sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder
+```
+
+The fastest way to prove the site is actually fine, for anyone who reports
+it broken: load it on a phone with wifi off. Different resolver, no cache.
+
+##### ⚠️ The old 2012 site is still live in the old reseller's 20i package
+
+`185.151.30.226` does not serve a holding page. It serves the **original
+pre-Weebly BARNA site**, the one with the 2012 annual conference on the
+front. That is what appeared during the outage, which is why it looked so
+much worse than a normal misconfiguration.
+
+It sits in the old reseller's hosting package, the same one that held DNS
+authority until 1 Sep 2026 (section 4b). It is unreachable unless DNS
+points at it, so it is harmless where it is, and it has no working login:
+its only member link is `members.htm`, a static page with no form. But it
+is one more reason to get that old package deleted rather than left
+lying around.
+
 ##### If the package is ever removed or re-added, re-check the zone
 
 The rewrite happened on attach with no warning and no prompt. Assume any
@@ -962,6 +1000,9 @@ is no self-serve route, so this ticket is the next step and not a fallback.
   the custom sender exists.
 - DMARC (section 5b) — required by Yahoo and Google, not optional.
 - Retire the old Weebly site.
+- **Get the old reseller's 20i hosting package deleted.** It still holds a
+  working copy of the pre-Weebly 2012 site, which surfaced publicly during
+  the 2 Sep 2026 outage (section 5a).
 
 **Small, independent:**
 - Rotate the `info@barna.co.uk` mailbox password. It was exposed in a
