@@ -300,6 +300,33 @@ that date itself, we built it:
   manual DRY RUN before trusting it, and check `MEMBERSTACK_SECRET_KEY` is
   a Live key: a Test key makes the job report success every morning while
   looking at an empty account.
+- `scripts/sync_from_member_sheet.py` is the ongoing route from the
+  membership secretary's own `ACTIVE MEMBERS` sheet on the BARNA Google Drive
+  into Memberstack, decided with Mike 2 Sep 2026. She keeps maintaining the
+  sheet she has always maintained; Mike exports it (File → Download → CSV) and
+  runs this. Dry run by default, `MEMBER_SYNC_LIVE_MODE=true` to apply.
+  It **creates** people in the sheet but not on the site and **updates** dates
+  she has changed. It **never removes anybody** — someone deleted from the
+  sheet is reported and left alone, because revoking access belongs to the
+  expiry job or a human.
+  Parsing is `prepare_member_import.py` and writing is
+  `import_legacy_members.py`, both called as subprocesses so there is one
+  tested copy of each; this script only decides what needs doing.
+  ⚠️ **Two of prepare's onboarding-day rules must not apply on a sync**, and
+  the script overrides both. It runs prepare with `--include-flagged` and
+  re-decides what blocks:
+  1. "expires soon after onboarding" is **not** blocking here. It was right
+     when creating 93 accounts at once; on a sync it would refuse a genuine
+     renewal purely for being close.
+  2. **the grace year IS blocking here.** prepare gives anyone already lapsed
+     twelve more months, which was Mike's deliberate one-off call so that
+     people were not created and stripped the next morning. Applied silently
+     on every sync it would quietly extend access for someone who has stopped
+     paying, so it is held for a person to decide.
+  Also blocking: unreadable or ambiguous dates, invalid emails, and **both**
+  rows of a duplicated email (prepare flags only the second, and picking
+  whichever came first would be a guess). Blocked rows go to
+  `_member-list/needs-review.txt` and are never written to Memberstack.
 - `scripts/export_members_xlsx.py` writes the reference spreadsheet Mike
   shares with the membership secretary, reading the **live** member list
   rather than the import CSV, so it cannot drift from what the site
