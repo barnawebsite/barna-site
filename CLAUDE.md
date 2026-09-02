@@ -306,6 +306,19 @@ that date itself, we built it:
   no separate "expired members list" to maintain. Whoever handles
   renewals should still check periodically who's expired and send the
   actual renewal email; this job only handles revoking access on time.
+- **✅ VERIFIED AGAINST LIVE MEMBERS, 2 Sep 2026.** After swapping in the
+  Live Admin API key, a dry run reported 81 on the Manual Access plan,
+  `WOULD REMOVE (0)`, 70 staying, 11 open-ended (`never`, the board), and
+  **an empty NEEDS MANUAL CHECK**. 70 + 11 = 81, so every member is
+  accounted for and every date parsed.
+  That empty manual list is the meaningful result: `parse_uk_date` splits
+  strictly on `DD/MM/YYYY` and returns `None` for anything else. Better
+  still, many dates have a day above 12 (`27/04/2027`, `31/07/2027`), which
+  would have failed as "month 27" had the source been US format. So the
+  whole import is confirmed British format, which was the most dangerous
+  silent failure available here.
+  Earliest expiry is 30 Oct 2026, so the first real removals are about
+  eight weeks out. Live mode re-armed after the dry run.
 - **Verified working end to end in Test Mode (Aug 2026):** a member one
   day past expiry had their plan removed by the scheduled run and lost
   members-area access; a member expiring in 2027 was untouched and kept
