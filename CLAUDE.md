@@ -299,6 +299,19 @@ that date itself, we built it:
   manual DRY RUN before trusting it, and check `MEMBERSTACK_SECRET_KEY` is
   a Live key: a Test key makes the job report success every morning while
   looking at an empty account.
+- `scripts/export_members_xlsx.py` writes the reference spreadsheet Mike
+  shares with the membership secretary, reading the **live** member list
+  rather than the import CSV, so it cannot drift from what the site
+  enforces. Read-only against Memberstack. Board members first, then
+  everyone else soonest-expiry-first (the dashboard cannot sort that column
+  usefully, since `accessexpiresat` is `DD/MM/YYYY` text and sorts by day of
+  month), then the held-back people read out of the import CSV because they
+  have no Memberstack record. Anything whose date will not parse gets its own
+  loud section: that member would otherwise never expire.
+  Output is `_member-list/BARNA-members.xlsx`, a **fixed name with no date in
+  it on purpose** — the file is shared from iCloud, and a new filename each
+  run would break the share and leave the other person on a stale copy. It
+  overwrites every run, so nothing in it should be edited by hand.
 - Onboarding the legacy members is two scripts, both dry run by default:
   `scripts/prepare_member_import.py` turns a CSV export of Mike's member
   spreadsheet into a flat import file, and `scripts/import_legacy_members.py`
