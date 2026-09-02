@@ -583,6 +583,37 @@ snapshot afterwards rather than trusting the panel.
 no-save (section 4a) and the split-authority problem (section 4b) both bit
 this domain already. Use the SOA serial check, not patience.
 
+#### ✅ DONE 2 Sep 2026: DKIM is signing
+
+Created at **Manage Hosting → the `barna.co.uk` package → Manage → Email →
+DomainKeys**, with these settings:
+
+| Field | Value |
+|---|---|
+| Domain | `barna.co.uk` |
+| Selector | `default` |
+| Flags | **`s` Production DKIM** — not test mode, which matters: receivers ignore a `t=y` test key |
+| Service Type | `*` |
+| Canonicalization | Relaxed |
+| Expiry time | 86400 |
+| Strict DKIM | unticked |
+| **Add DNS Record** | **ticked** — this is what writes the TXT record |
+
+Published as `default._domainkey.barna.co.uk`, a 2048 bit RSA key, live on
+all four `stackdns.com` nameservers and on Cloudflare, Google and Quad9.
+
+⚠️ **Filling the form is not creating the signature.** The first attempt
+looked complete on screen but nothing had happened: the SOA serial was
+unchanged and no record existed. The **Add Signature** button sits below
+the Strict DKIM / Add DNS Record checkboxes, past the fold. Once pressed,
+the signature appears in a **DKIM Signatures (1)** list showing Enabled,
+and the serial moves. Same lesson as section 4a: on this panel, always
+confirm with the serial rather than the screen.
+
+Reassuring side finding: **visiting the hosting panel does not rewrite the
+zone.** The damage described above happens only when the package is first
+attached. The zone was byte for byte identical before and after this job.
+
 ### 5b. Then add DMARC
 
 Previously filed here as optional. It is not: Yahoo and Google both want a
@@ -991,9 +1022,9 @@ is no self-serve route, so this ticket is the next step and not a fallback.
 > Mike
 
 **Also outstanding:**
-- **DKIM for the `info@` mailbox (section 5).** Now urgent rather than
-  tidy: as of 2 Sep 2026 Yahoo, AOL and Sky reject mail from the domain
-  outright. Twelve members bounced on the first real mailout.
+- ~~DKIM for the `info@` mailbox~~ **done 2 Sep 2026** (section 5a).
+  Still to do: DMARC, then a real test send, then re-send to the twelve
+  members who bounced.
 - Memberstack custom email sender + its DKIM records (section 4).
 - Onboard the ~91 legacy members onto Manual Access with `accessexpiresat`
   dates. Possible today via Memberstack's default sender, but better after
