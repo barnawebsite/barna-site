@@ -49,3 +49,16 @@ wildcard check (must be empty):
 
 site check:
 https://barna.co.uk -> 200
+
+# ---------------------------------------------------------------------
+# 10:47 UTC: Free Web Hosting was attached to reach the DKIM tool. It
+# rewrote the zone and took the website down. Restored by hand to:
+#
+#   apex A    185.199.108.153   (single record; GitHub Pages is fine with one)
+#   apex AAAA removed
+#   *  A/AAAA removed
+#   apex TXT  v=spf1 include:spf.stackmail.com a mx ~all
+#
+# Everything else above was untouched by the package and is unchanged.
+# Still to re-add for redundancy: A 185.199.109.153 / .110.153 / .111.153
+# ---------------------------------------------------------------------

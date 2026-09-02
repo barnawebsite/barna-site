@@ -484,6 +484,55 @@ apex TXT still one SPF, `https://barna.co.uk` still 200, and
 `info@barna.co.uk` still listed and still able to receive. Only once all of
 that passes is it safe to go on to the DomainKeys tool.
 
+#### ⚠️ WHAT THE FREE PACKAGE ACTUALLY DID, 2 Sep 2026: it took the site down
+
+It was worse than "may overwrite the A records". Attaching Free Web Hosting
+rewrote the zone the moment it was created, and `https://barna.co.uk`
+stopped answering. Full diff against `dns-snapshot-2026-09-02.txt`:
+
+| Record | Before | After the package |
+|---|---|---|
+| apex `A` | four GitHub IPs | **`185.151.30.226`** (20i) |
+| apex `AAAA` | none | **`2a07:7800::226`** added |
+| `*` `A` | none | **`185.151.30.226`** added |
+| `*` `AAAA` | none | **`2a07:7800::226`** added |
+| apex SPF | ends `~all` | **ends `-all`** |
+| `autodiscover`, `ftp` CNAMEs | absent | added (harmless, left in place) |
+| apex `MX`, `www`, `send.*`, `resend._domainkey`, imap/mail/pop3/smtp | — | **all untouched** ✅ |
+
+Two things to take from that. **The AAAA records are the trap**: DNS-only
+checks that look at `A` will say the zone is fine while IPv6 visitors still
+land on 20i. And **the SPF qualifier change is silent** — `-all` instead of
+`~all` is a hard fail rather than a soft one, which is the kind of thing
+that surfaces a week later as mysterious bounces.
+
+**Nothing about mail broke.** The MX and every mail CNAME survived, which
+is the one genuinely good piece of news.
+
+##### Fixing it: edit in place, do not add
+
+Section 10's gotcha 4 says 20i's Name field mangles apex entries and getting
+apex records in previously took support's help. That does not apply here,
+because the package leaves apex rows *already present* with editable Data
+boxes. So:
+
+1. **Edit** the existing apex `A` Data box to `185.199.108.153`.
+2. **Remove** `*` `A`, `*` `AAAA` and apex `AAAA`.
+3. **Edit** the apex TXT back to `v=spf1 include:spf.stackmail.com a mx ~all`.
+4. **Update DNS**.
+
+GitHub Pages is happy on a single A record, so one is enough to restore
+service; the other three are redundancy and can wait. Done this way the
+site came back within minutes, verified against all four `stackdns.com`
+nameservers and five public resolvers, with the Let's Encrypt certificate
+for `barna.co.uk` intact.
+
+##### If the package is ever removed or re-added, re-check the zone
+
+The rewrite happened on attach with no warning and no prompt. Assume any
+change to the hosting package can do it again, and always diff against the
+snapshot afterwards rather than trusting the panel.
+
 #### The tool, once the package exists
 
 - Selector: any name will do. `default` is fine.
