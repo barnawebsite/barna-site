@@ -6,3 +6,6 @@ _to-upload-google-drive/
 _member-list/
 *member*import*.csv
 !scripts/member-import-template.csv
+
+# Raw conference material waiting to be sorted into the site
+_to-sort-conferences/
