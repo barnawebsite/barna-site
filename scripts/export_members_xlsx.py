@@ -45,6 +45,11 @@ BASE_URL = "https://admin.memberstack.com"
 FIELD_FIRST = "first-name"
 FIELD_LAST = "last-name"
 FIELD_EXPIRY = "accessexpiresat"
+# Added 3 Sep 2026 for posting membership packs. The address key really does
+# end in a hyphen: Memberstack slugified the label's closing bracket. Use it
+# verbatim, and never retype it from the label.
+FIELD_ADDRESS = "address-to-receive-membership-pack-"
+FIELD_WORK = "place-of-work"
 
 # Brand colours, same as css/style.css.
 NAVY = "0D2137"
@@ -145,9 +150,12 @@ def read_held_back(path):
         return [r for r in csv.DictReader(fh) if r.get("skip", "").strip()]
 
 
-HEADERS = ["#", "First name", "Surname", "Email", "Access expires", "Notes"]
+HEADERS = ["#", "First name", "Surname", "Email", "Access expires",
+           "Place of work", "Address", "Notes"]
 HEADERS_HELD = ["#", "First name", "Surname", "Email",
                 "Date on the spreadsheet", "Why it needs checking"]
+HEADERS_BAD = ["#", "First name", "Surname", "Email", "Value found",
+               "What to do"]
 
 
 def build(rows_board, rows_dated, rows_held, unparsed, out_path, today):
@@ -195,9 +203,8 @@ def build(rows_board, rows_dated, rows_held, unparsed, out_path, today):
         state["row"] += 1
 
     def write(items):
-        for n, (first, last, email, date_text, note) in enumerate(items, start=1):
-            for i, value in enumerate(
-                    [n, first, last, email, date_text, note], start=1):
+        for n, values in enumerate(items, start=1):
+            for i, value in enumerate([n, *values], start=1):
                 cell(i, value, border=True, centre=i in (1, 5))
             state["row"] += 1
         state["row"] += 2
@@ -210,7 +217,9 @@ def build(rows_board, rows_dated, rows_held, unparsed, out_path, today):
     section("2. Members with an expiry date, soonest first",
             f"{len(rows_dated)} people. Access ends on the date shown unless "
             f"they renew. Anyone who joined on the website renews by card "
-            f"automatically and is marked as such.", TEAL)
+            f"automatically and is marked as such. Address and place of work "
+            f"are collected from new members only, so they are blank for "
+            f"anyone carried over from the old list.", TEAL)
     write(rows_dated)
 
 
@@ -224,10 +233,10 @@ def build(rows_board, rows_dated, rows_held, unparsed, out_path, today):
         section("4. Needs attention: date could not be read",
                 f"{len(unparsed)} people. Their date is not DD/MM/YYYY, so "
                 f"their access will never expire on its own. Fix in "
-                f"Memberstack.", CORAL)
+                f"Memberstack.", CORAL, HEADERS_BAD)
         write(unparsed)
 
-    for i, width in enumerate([5, 16, 20, 34, 20, 66], start=1):
+    for i, width in enumerate([5, 16, 20, 34, 16, 28, 42, 40], start=1):
         ws.column_dimensions[get_column_letter(i)].width = width
     ws.sheet_view.showGridLines = False
 
@@ -262,9 +271,12 @@ def main():
         last = fields.get(FIELD_LAST) or ""
         email = m["auth"]["email"]
         raw = (fields.get(FIELD_EXPIRY) or "").strip()
+        work = fields.get(FIELD_WORK) or ""
+        address = fields.get(FIELD_ADDRESS) or ""
 
         if raw.lower() == "never":
-            board.append((first, last, email, "never", "Board, indefinite"))
+            board.append((first, last, email, "never", work, address,
+                          "Board, indefinite"))
         elif parse_uk_date(raw):
             # Flag the ones worth chasing now. Whoever handles renewals reads
             # this sheet, and "soonest first" alone does not say where the
@@ -276,7 +288,7 @@ def main():
                 note = f"Renews in {days} days"
             else:
                 note = ""
-            dated.append((first, last, email, raw, note))
+            dated.append((first, last, email, raw, work, address, note))
         else:
             unparsed.append((first, last, email, raw or "(blank)",
                              "Not a DD/MM/YYYY date, so the expiry job will "
@@ -310,6 +322,8 @@ def main():
             renews = joined.replace(year=joined.year + 1, day=28)
         dated.append((fields.get(FIELD_FIRST) or "", fields.get(FIELD_LAST) or "",
                       m["auth"]["email"], renews.strftime("%d/%m/%Y"),
+                      fields.get(FIELD_WORK) or "",
+                      fields.get(FIELD_ADDRESS) or "",
                       f"Joined on the website {joined.strftime('%d/%m/%Y')}, "
                       f"renews by card automatically"))
     dated.sort(key=lambda r: (parse_uk_date(r[3]), r[1].lower()))
