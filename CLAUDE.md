@@ -108,12 +108,6 @@ Notes on why it's structured this way:
   recordings/files linked, legacy "Earlier resources" list. The
   `<!-- EDIT: add recording/slides link -->` comments on recent webinar
   cards are intentional slots for future recordings, not gaps.
-- `webinar.html` — built 3 Sep 2026, reachable as **`barna.co.uk/webinar`**.
-  Deliberately NOT in the nav: it is a permanent address to put on posters,
-  emails and social posts, not a browsing destination. Link to it from the
-  homepage Events section when a webinar is live. See the Webinars section
-  below for how it works; the page ships with placeholder values and is not
-  usable until the Memberstack side exists.
 - `join.html` was removed — Join is a modal (`data-ms-modal="signup"`)
   triggered from the hero button and footer link, not a standalone page.
 - The old Weebly site is no longer referenced anywhere — all assets
@@ -122,7 +116,18 @@ Notes on why it's structured this way:
   current — no newer version exists despite the old site's "updated
   soon" note.
 
-## Webinars — replacing Eventbrite (started 3 Sep 2026)
+## Webinars — ⏸ PAUSED 3 Sep 2026. Eventbrite stays for now.
+
+**Do not build on this. Do not raise it unless Mike does.** He asked to
+stop and think about it, so Eventbrite and the current arrangement stay
+exactly as they are. `webinar.html` was built and then removed from the
+site the same day, because a public page advertising an invented webinar
+is worse than no page. It is in git history at commit `e2cb79c` and comes
+back with `git checkout e2cb79c -- webinar.html` if he ever picks this up.
+
+The rest of this section is kept only so the thinking does not have to be
+redone. It records what the problem actually was, which took a couple of
+rounds to get right.
 
 Mike wants Eventbrite gone: one place to promote from, one place to pay,
 and no second system to log into. Two problems had to be solved together,
@@ -170,10 +175,10 @@ removed, they simply stop matching the group.
 ⚠️ If the old plan is not unlinked, last month's guests get in free. That
 unlink is the one step that genuinely must not be skipped.
 
-### Still unverified — do not treat this as working yet
-`webinar.html` ships with `PASTE-...` placeholders and has only been proved
-to render and wire itself up correctly. None of the Memberstack side exists
-yet. Before announcing anything, confirm on a real account:
+### Never verified — nothing was ever set up
+No Memberstack plan, price or gated group was created, so none of this has
+ever run. The page was placeholders only and was proved to render and wire
+itself up, nothing more. If it is ever revived, confirm on a real account:
 1. a one-time £5 price can be bought by someone who is not a member, and
    lands them in the `barna-webinar-guest` group;
 2. `$memberstackDom.updateMember({customFields:{bookedwebinar: ...}})`
@@ -199,9 +204,9 @@ Worth remembering rather than rediscovering:
 - Every £5 guest becomes a Memberstack account, so the member count climbs
   faster still. It was already true that member count ≠ paid count.
 
-The Eventbrite links themselves are still live in 12 places (the footer
-social icon on every page, the members.html CTA band, a commented
-placeholder on index.html). Leave them until the website route is proven.
+Nothing about Eventbrite was changed. Its links are live in 12 places as
+they always were: the footer social icon on every page, the members.html
+CTA band, and a commented placeholder on index.html.
 
 ## Membership (Memberstack)
 - **Paid-only by design.** Two halves that must stay in sync — if you add
