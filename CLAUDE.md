@@ -435,6 +435,25 @@ that date itself, we built it:
   access automatically and rejoins through the website like anyone else. The
   only manual case left is the handful in `_member-list/held-back.txt`, added
   by hand in the dashboard if the membership secretary confirms they renewed.
+- **Address and place of work, added 3 Sep 2026.** Two Memberstack custom
+  fields collect these at signup, so they are filled in by new members only.
+  The keys are `place-of-work` and, note, **`address-to-receive-membership-pack-`
+  with a trailing hyphen** — Memberstack slugified the closing bracket of the
+  label. Use it verbatim; retyping it from the label silently writes to a field
+  nothing reads. Neither can be made mandatory in the pre-built modal, so blanks
+  are expected; Mike's call is that this is fine.
+  The 90 existing members were backfilled the same day from the membership
+  secretary's sheet (Address + Post Code joined into the one box, Place of
+  Work): 87 written, 2 blank in her sheet, 4 unmatched because they are the
+  held-back people with no account, and Mat Simcock absent because he was added
+  by hand. That was a **one-off catch-up, not an ongoing sync** — see the note
+  above about why the sheet is no longer a source of truth. The script lived in
+  a scratch directory and was deliberately not committed.
+  ⚠️ It matters that the backfill sent each member's **whole** customFields
+  object back, not just the two new keys: it was not established whether
+  Memberstack's PATCH merges or replaces, and a replace would have wiped
+  `accessexpiresat` for all 87 and left nobody's access ever expiring. It
+  re-read each record afterwards and would have stopped on the first lost date.
 - `scripts/export_members_xlsx.py` writes the reference spreadsheet Mike
   shares with the membership secretary, reading the **live** member list
   rather than the import CSV, so it cannot drift from what the site
