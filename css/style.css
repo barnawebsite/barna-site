@@ -525,6 +525,11 @@ footer.site-footer {
   object-fit: cover;
   border-radius: 8px;
 }
+.photo-credit {
+  font-size: 13px;
+  color: #45606b;
+  margin-top: 10px;
+}
 
 /* ---------- Responsive ---------- */
 @media (max-width: 720px) {
