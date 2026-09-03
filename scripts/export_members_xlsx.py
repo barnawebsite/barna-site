@@ -150,8 +150,7 @@ HEADERS_HELD = ["#", "First name", "Surname", "Email",
                 "Date on the spreadsheet", "Why it needs checking"]
 
 
-def build(rows_board, rows_dated, rows_paying, rows_held, unparsed,
-          out_path, today):
+def build(rows_board, rows_dated, rows_held, unparsed, out_path, today):
     wb = Workbook()
     ws = wb.active
     ws.title = "Members"
@@ -172,7 +171,7 @@ def build(rows_board, rows_dated, rows_paying, rows_held, unparsed,
             c.alignment = Alignment(horizontal="center")
         return c
 
-    live = len(rows_board) + len(rows_dated) + len(rows_paying)
+    live = len(rows_board) + len(rows_dated)
     cell(1, "BARNA membership list, as set up on the website",
          Font(name="Arial", size=14, bold=True, color=NAVY))
     state["row"] += 1
@@ -209,25 +208,20 @@ def build(rows_board, rows_dated, rows_paying, rows_held, unparsed,
     write(rows_board)
 
     section("2. Members with an expiry date, soonest first",
-            f"{len(rows_dated)} people, carried over from the old membership "
-            f"list. Access is removed automatically on the date shown.", TEAL)
+            f"{len(rows_dated)} people. Access ends on the date shown unless "
+            f"they renew. Anyone who joined on the website renews by card "
+            f"automatically and is marked as such.", TEAL)
     write(rows_dated)
 
-    if rows_paying:
-        section("3. Joined through the website, paying by card",
-                f"{len(rows_paying)} people. Stripe renews them yearly on its "
-                f"own, so they have no expiry date here.", TEAL,
-                ["#", "First name", "Surname", "Email", "Member since", "Plan"])
-        write(rows_paying)
 
     if rows_held:
-        section("4. Not set up yet, dates to confirm",
+        section("3. Not set up yet, dates to confirm",
                 f"{len(rows_held)} people. No account and no email sent to "
                 f"them. Nothing here is urgent.", CORAL, HEADERS_HELD)
         write(rows_held)
 
     if unparsed:
-        section("5. Needs attention: date could not be read",
+        section("4. Needs attention: date could not be read",
                 f"{len(unparsed)} people. Their date is not DD/MM/YYYY, so "
                 f"their access will never expire on its own. Fix in "
                 f"Memberstack.", CORAL)
@@ -235,7 +229,6 @@ def build(rows_board, rows_dated, rows_paying, rows_held, unparsed,
 
     for i, width in enumerate([5, 16, 20, 34, 20, 66], start=1):
         ws.column_dimensions[get_column_letter(i)].width = width
-    ws.freeze_panes = "A5"
     ws.sheet_view.showGridLines = False
 
     out_dir = os.path.dirname(out_path)
@@ -290,7 +283,6 @@ def main():
                              "never act on it"))
 
     board.sort(key=lambda r: (r[1].lower(), r[0].lower()))
-    dated.sort(key=lambda r: (parse_uk_date(r[3]), r[1].lower()))
 
     held = []
     for r in read_held_back(args.held) if args.held else []:
@@ -305,27 +297,29 @@ def main():
     held.sort(key=lambda r: (parse_uk_date(r[3]) or datetime.date(2100, 1, 1),
                              r[1].lower()))
 
-    paying = []
+    # Website members have no accessexpiresat: Stripe renews them. Show the
+    # date their subscription comes up instead, a year on from joining, so they
+    # sort into the same list rather than needing a section of their own. It is
+    # when they will be charged, not a date access is cut off, hence the note.
     for m in paid:
         fields = m.get("customFields") or {}
-        plan = active_plans(m)[0]
-        since = (m.get("createdAt") or "")[:10]
+        joined = datetime.date.fromisoformat((m.get("createdAt") or "")[:10])
         try:
-            since = datetime.date.fromisoformat(since).strftime("%d/%m/%Y")
-        except ValueError:
-            since = since or "?"
-        paying.append((fields.get(FIELD_FIRST) or "", fields.get(FIELD_LAST) or "",
-                       m["auth"]["email"], since,
-                       f"{plan.get('planName') or 'paid plan'}, renews through "
-                       f"Stripe"))
-    paying.sort(key=lambda r: (r[1].lower(), r[0].lower()))
+            renews = joined.replace(year=joined.year + 1)
+        except ValueError:                          # 29 February
+            renews = joined.replace(year=joined.year + 1, day=28)
+        dated.append((fields.get(FIELD_FIRST) or "", fields.get(FIELD_LAST) or "",
+                      m["auth"]["email"], renews.strftime("%d/%m/%Y"),
+                      f"Joined on the website {joined.strftime('%d/%m/%Y')}, "
+                      f"renews by card automatically"))
+    dated.sort(key=lambda r: (parse_uk_date(r[3]), r[1].lower()))
 
     today = datetime.date.today()
-    build(board, dated, paying, held, unparsed, args.out, today)
+    build(board, dated, held, unparsed, args.out, today)
 
     print(f"  board, open ended: {len(board)}")
-    print(f"  legacy, with an expiry date: {len(dated)}")
-    print(f"  joined through the website, paying: {len(paying)}")
+    print(f"  with an expiry date: {len(dated)} "
+          f"(including {len(paid)} who joined on the website)")
     print(f"  held back, not in Memberstack: {len(held)}")
     if unparsed:
         print(f"  ⚠️  UNREADABLE DATE: {len(unparsed)} — these will never "
