@@ -128,9 +128,13 @@ def parse_uk_date(text):
         return None
 
 
+def active_plans(member):
+    return [p for p in member.get("planConnections", [])
+            if p.get("status") == "ACTIVE"]
+
+
 def on_manual_access(member):
-    return any(p.get("planId") == PLAN_ID and p.get("status") == "ACTIVE"
-               for p in member.get("planConnections", []))
+    return any(p.get("planId") == PLAN_ID for p in active_plans(member))
 
 
 def read_held_back(path):
@@ -146,7 +150,8 @@ HEADERS_HELD = ["#", "First name", "Surname", "Email",
                 "Date on the spreadsheet", "Why it needs checking"]
 
 
-def build(rows_board, rows_dated, rows_held, unparsed, out_path, today):
+def build(rows_board, rows_dated, rows_paying, rows_held, unparsed,
+          out_path, today):
     wb = Workbook()
     ws = wb.active
     ws.title = "Members"
@@ -167,7 +172,7 @@ def build(rows_board, rows_dated, rows_held, unparsed, out_path, today):
             c.alignment = Alignment(horizontal="center")
         return c
 
-    live = len(rows_board) + len(rows_dated)
+    live = len(rows_board) + len(rows_dated) + len(rows_paying)
     cell(1, "BARNA membership list, as set up on the website",
          Font(name="Arial", size=14, bold=True, color=NAVY))
     state["row"] += 1
@@ -204,18 +209,25 @@ def build(rows_board, rows_dated, rows_held, unparsed, out_path, today):
     write(rows_board)
 
     section("2. Members with an expiry date, soonest first",
-            f"{len(rows_dated)} people. Access is removed automatically on "
-            f"the date shown, nothing needs doing by hand.", TEAL)
+            f"{len(rows_dated)} people, carried over from the old membership "
+            f"list. Access is removed automatically on the date shown.", TEAL)
     write(rows_dated)
 
+    if rows_paying:
+        section("3. Joined through the website, paying by card",
+                f"{len(rows_paying)} people. Stripe renews them yearly on its "
+                f"own, so they have no expiry date here.", TEAL,
+                ["#", "First name", "Surname", "Email", "Member since", "Plan"])
+        write(rows_paying)
+
     if rows_held:
-        section("3. Not set up yet, dates to confirm",
+        section("4. Not set up yet, dates to confirm",
                 f"{len(rows_held)} people. No account and no email sent to "
                 f"them. Nothing here is urgent.", CORAL, HEADERS_HELD)
         write(rows_held)
 
     if unparsed:
-        section("4. Needs attention: date could not be read",
+        section("5. Needs attention: date could not be read",
                 f"{len(unparsed)} people. Their date is not DD/MM/YYYY, so "
                 f"their access will never expire on its own. Fix in "
                 f"Memberstack.", CORAL)
@@ -242,8 +254,13 @@ def main():
                          "pass '' to leave that section out")
     args = ap.parse_args()
 
-    members = [m for m in fetch_all_members() if on_manual_access(m)]
-    print(f"Members on Manual Access plan: {len(members)}")
+    # Everyone with any active plan, not just the legacy free one. A member who
+    # joined through the website is on the paid annual plan, and an export that
+    # quietly left those out would get more wrong with every signup.
+    everyone = [m for m in fetch_all_members() if active_plans(m)]
+    members = [m for m in everyone if on_manual_access(m)]
+    paid = [m for m in everyone if not on_manual_access(m)]
+    print(f"Members with access: {len(everyone)}")
 
     board, dated, unparsed = [], [], []
     for m in members:
@@ -288,11 +305,27 @@ def main():
     held.sort(key=lambda r: (parse_uk_date(r[3]) or datetime.date(2100, 1, 1),
                              r[1].lower()))
 
+    paying = []
+    for m in paid:
+        fields = m.get("customFields") or {}
+        plan = active_plans(m)[0]
+        since = (m.get("createdAt") or "")[:10]
+        try:
+            since = datetime.date.fromisoformat(since).strftime("%d/%m/%Y")
+        except ValueError:
+            since = since or "?"
+        paying.append((fields.get(FIELD_FIRST) or "", fields.get(FIELD_LAST) or "",
+                       m["auth"]["email"], since,
+                       f"{plan.get('planName') or 'paid plan'}, renews through "
+                       f"Stripe"))
+    paying.sort(key=lambda r: (r[1].lower(), r[0].lower()))
+
     today = datetime.date.today()
-    build(board, dated, held, unparsed, args.out, today)
+    build(board, dated, paying, held, unparsed, args.out, today)
 
     print(f"  board, open ended: {len(board)}")
-    print(f"  with an expiry date: {len(dated)}")
+    print(f"  legacy, with an expiry date: {len(dated)}")
+    print(f"  joined through the website, paying: {len(paying)}")
     print(f"  held back, not in Memberstack: {len(held)}")
     if unparsed:
         print(f"  ⚠️  UNREADABLE DATE: {len(unparsed)} — these will never "

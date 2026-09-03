@@ -331,6 +331,11 @@ that date itself, we built it:
   month), then the held-back people read out of the import CSV because they
   have no Memberstack record. Anything whose date will not parse gets its own
   loud section: that member would otherwise never expire.
+  It lists everyone with **any** active plan, not just the legacy free one:
+  members who join through the website are on the paid annual plan, and an
+  export filtered to Manual Access would silently omit every one of them. They
+  get their own section, with the date they joined instead of an expiry date,
+  since Stripe renews them and `accessexpiresat` does not apply.
   Output is `_member-list/BARNA-members.xlsx`, a **fixed name with no date in
   it on purpose** — the file is shared from iCloud, and a new filename each
   run would break the share and leave the other person on a stale copy. It
