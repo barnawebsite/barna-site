@@ -431,13 +431,37 @@ no admin route to "just set a password" for someone. Consequences:
   address on the account was a personal hotmail one.
 - A custom sender (**Settings → Email Sender Address**) is therefore a
   quality decision, not a prerequisite. It buys mail from `@barna.co.uk`
-  and better deliverability. It needs **one MX and two TXT records**, so it
-  still waits on DNS control, i.e. the registrar move off SYPO.
+  and better deliverability. It needs **one MX and two TXT records**.
   Memberstack uses Resend, which asks for an **MX record** — but on the
   `send.` subdomain, not the apex, so the existing `mx.stackmail.com` MX
   and the apex SPF are both untouched and no SPF merge is needed
   (confirmed 1 Sep 2026). Section 4 of `dns-cutover.md` has the exact
   records and the dig checks that prove mail still works.
+  **Done and verified:** the transactional sender is `info@barna.co.uk`
+  and shows "Sender verified" in the dashboard (3 Sep 2026).
+
+### Email Campaigns needs a SECOND sender, on its own subdomain
+Memberstack splits mail in two, and they cannot share a domain:
+- **Transactional sender** — password resets, verification, welcome mail.
+  This is `info@barna.co.uk`, verified, and it is the one that matters most,
+  because every legacy member's route back in is a password reset.
+- **Campaign sender** — bulk mailouts from Email Campaigns (beta).
+
+Typing `info@barna.co.uk` into the campaign sender field is **rejected**:
+*"Campaign sender must use a different domain than your transactional
+sender. Use a separate subdomain to protect login email deliverability."*
+That separation is deliberate and worth keeping — a bulk send that attracts
+spam complaints must not be able to poison password resets.
+
+So the campaign sender has to be something like `hello@news.barna.co.uk`,
+which means **another round of Resend verification records** for
+`news.barna.co.uk` at 20i, on top of the `send.barna.co.uk` set already in
+the zone. Memberstack offers `news`, `marketing`, `hello` and `send` as
+suggested subdomains — **do not pick `send`**: `send.barna.co.uk` is
+already carrying the transactional MX, SPF and DKIM, and reusing it is
+exactly the sharing this dialog exists to prevent. `news` is the safe pick.
+Re-run `scripts/verify_dns.sh` afterwards, and remember 20i's DNS editor
+does not save as you type (section 4 of `dns-cutover.md`).
 - ⚠️ **The free 20i hosting package on `barna.co.uk` must stay.** It looks
   like unused clutter (the website is on GitHub Pages and needs no
   hosting), but **DKIM signing for outbound mail lives on it** — 20i only
@@ -519,15 +543,28 @@ owner first, but it's easy to miss. Either push something occasionally
 or re-enable it from the Actions tab when warned.
 
 ## Deploying — GitHub Pages
-- **Live site: https://barnawebsite.github.io/barna-site/**
+- **Live site: https://barna.co.uk** — the custom domain is done (cutover
+  31 Aug 2026, zone finished 2 Sep 2026). GitHub-issued HTTPS is on. The
+  `CNAME` file at the repo root holds `barna.co.uk`; deleting it drops the
+  domain, so leave it there.
+- The old `barnawebsite.github.io/barna-site/` address still 301s to
+  `barna.co.uk`, but the **bare** `barnawebsite.github.io` host serves
+  nothing. Never quote either as the live address — that stale host is what
+  broke the Memberstack redirects and the transactional emails, twice.
 - `git push origin main` is the whole deploy. GitHub's "pages build and
   deployment" workflow publishes in ~1 minute. No dashboards, no buttons,
   no credits — the free tier allows ~10 builds/hour, so push freely.
 - Served from branch `main`, folder `/ (root)`. `.nojekyll` at the repo
   root stops Jekyll rewriting anything; leave it there.
-- Every link in the site is **relative** — that's what lets it work from
-  the `/barna-site/` subpath. Never introduce `href="/..."` absolute
-  paths or they'll break until a custom domain is set.
+- Every link in the site is **relative**, from when the site lived on the
+  `/barna-site/` subpath. It no longer has to be, now the site is at the
+  domain root — but keep it that way: relative links work in both places
+  and mean a local `file://` preview behaves like the live site. There is
+  no reason to introduce `href="/..."` absolute paths.
+- Extensionless URLs work only where the file exists: GitHub Pages maps
+  `/members` to `members.html`. So a new page at `webinar.html` is reachable
+  as `barna.co.uk/webinar`, but `/account`, `/profile` and `/join` 404.
+  This is plain static hosting with no routing — don't invent paths.
 - Moved off Netlify Aug 2026: free tier gave 300 credits/month at 15 per
   deploy (~20 deploys), and Mike ran out. GitHub Pages is free and
   effectively unlimited for a static site. Netlify kept briefly as a
@@ -542,18 +579,32 @@ day. Config that looks correct can still mean nothing ever ran:
   build existed until a fresh commit was pushed (an empty commit is a
   fine way to force one: `git commit --allow-empty`).
 
-### Custom domain (not done yet) — see `dns-cutover.md`
-`dns-cutover.md` at the repo root is the prepared step-by-step for this:
-current DNS snapshot, the exact GitHub Pages records, the Memberstack
-sender setup, DMARC, and the order to do them in. Written Aug 2026 while
-waiting on domain access, so the cutover is copy-paste rather than
-research. **Its "Do not break email" section matters most** — MX and SPF
-must survive the move, and there must only ever be one SPF record.
+### Custom domain — DONE. `dns-cutover.md` is now the record, not the plan
+`dns-cutover.md` at the repo root was written Aug 2026 as a step-by-step
+while waiting on domain access. It has since been worked through and is now
+the **history** of what was done and what went wrong, which is why it is
+long. Read it before touching DNS; do not read it as a to-do list.
 
+Settled as of 3 Sep 2026, verified against live DNS:
 
-barna.co.uk still points at the old Weebly site. To switch: Settings →
-Pages → Custom domain, plus DNS records at the registrar. GitHub issues
-free HTTPS. That's the last step before Weebly can be retired.
+| What | State |
+|---|---|
+| `barna.co.uk` → GitHub Pages | four apex A records + `www` CNAME ✅ |
+| HTTPS | GitHub-issued, live ✅ |
+| Registrar / registrant / DNS control | all held by BARNA, off SYPO ✅ |
+| Mailbox `info@barna.co.uk` | live at StackMail, apex MX `mx.stackmail.com` ✅ |
+| Outbound DKIM for that mailbox | selector `default`, live ✅ |
+| DMARC | `_dmarc`, `p=none`, live ✅ |
+| Memberstack transactional sender | `info@barna.co.uk`, **verified** ✅ |
+| Its Resend records | `send.barna.co.uk` MX + SPF, `resend._domainkey` ✅ |
+
+**Its "Do not break email" section still matters most** — the apex MX and
+the single apex SPF must survive any future change, and there must only
+ever be one SPF record. Run `scripts/verify_dns.sh` after anything 20i
+touches; section 5e explains why.
+
+The old Weebly site is no longer referenced anywhere and nothing points at
+it. It can be retired whenever Mike gets round to cancelling it.
 
 ## Working style
 - One task/page at a time, not bulk production.
