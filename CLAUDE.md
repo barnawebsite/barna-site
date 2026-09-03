@@ -108,6 +108,12 @@ Notes on why it's structured this way:
   recordings/files linked, legacy "Earlier resources" list. The
   `<!-- EDIT: add recording/slides link -->` comments on recent webinar
   cards are intentional slots for future recordings, not gaps.
+- `webinar.html` — built 3 Sep 2026, reachable as **`barna.co.uk/webinar`**.
+  Deliberately NOT in the nav: it is a permanent address to put on posters,
+  emails and social posts, not a browsing destination. Link to it from the
+  homepage Events section when a webinar is live. See the Webinars section
+  below for how it works; the page ships with placeholder values and is not
+  usable until the Memberstack side exists.
 - `join.html` was removed — Join is a modal (`data-ms-modal="signup"`)
   triggered from the hero button and footer link, not a standalone page.
 - The old Weebly site is no longer referenced anywhere — all assets
@@ -115,6 +121,87 @@ Notes on why it's structured this way:
 - BARNA Standards of Practice: checked Aug 2026, the 2012 edition is
   current — no newer version exists despite the old site's "updated
   soon" note.
+
+## Webinars — replacing Eventbrite (started 3 Sep 2026)
+
+Mike wants Eventbrite gone: one place to promote from, one place to pay,
+and no second system to log into. Two problems had to be solved together,
+and the second one is the reason the design is not simply "a page with a
+Teams link on it".
+
+**Problem 1 — people cannot find the Teams link.** It only ever existed
+inside one email, so anyone who lost the email asked Mike, including board
+members and speakers. Fixed by giving the link one permanent home at
+`barna.co.uk/webinar`. That address goes on everything and never changes.
+The Teams link lives in exactly one place, `window.WEBINAR.teamsLink` in
+`webinar.html`, so a meeting recreated ten minutes before the start is a
+one-line edit and nobody needs telling.
+
+**Problem 2 — nobody knows the headcount.** This is what Eventbrite was
+actually being used for. Twice, sessions were organised with one or two
+people booked and no way to know in advance. Booking also creates a bit of
+commitment, which is why members booked free with a promo code rather than
+just being told to turn up.
+
+### How a booking is recorded
+Two routes in, and they are counted in two different places:
+
+| Who | Route | Where the count is read |
+|---|---|---|
+| Member | clicks "Yes, save me a place" | custom field `bookedwebinar` in the dashboard member list, filtered to this webinar's `bookingRef` |
+| Non-member | pays £5 | the member list for that webinar's own £5 plan |
+
+**Members are deliberately not gated on having booked.** Booking is a
+courtesy that produces the headcount; it is not access control. A member
+who forgets to book still sees the join link, because locking a paid-up
+member out of a webinar they have already paid for through membership
+would be a far worse failure than an inaccurate count.
+
+### The per-webinar setup, and the one permanent gate key
+The £5 buys **one named webinar**, Mike's call — not a day pass, because a
+day pass gives no per-event list.
+
+The gated group key in the HTML is `barna-webinar-guest` and is
+**permanent**. Each webinar gets its own new £5 plan, which is linked to
+that one group in the dashboard while last month's is unlinked. That is
+what keeps the HTML gate constant while the paying audience rotates. It
+also means there is no expiry job and no cleanup: nobody's plan is ever
+removed, they simply stop matching the group.
+⚠️ If the old plan is not unlinked, last month's guests get in free. That
+unlink is the one step that genuinely must not be skipped.
+
+### Still unverified — do not treat this as working yet
+`webinar.html` ships with `PASTE-...` placeholders and has only been proved
+to render and wire itself up correctly. None of the Memberstack side exists
+yet. Before announcing anything, confirm on a real account:
+1. a one-time £5 price can be bought by someone who is not a member, and
+   lands them in the `barna-webinar-guest` group;
+2. `$memberstackDom.updateMember({customFields:{bookedwebinar: ...}})`
+   succeeds from the browser for a logged-in member, and the value shows as
+   a column in the dashboard;
+3. the value survives and reads back on a return visit.
+Item 2 is the one most likely to need changing — if the DOM package will
+not write a custom field, the fallback is a `data-ms-form` profile form.
+
+### What was consciously given up with Eventbrite
+Worth remembering rather than rediscovering:
+- **No automatic confirmation or reminder email.** Email Campaigns can
+  filter by plan, so a reminder to that webinar's guests is possible, but it
+  is a send someone has to remember. The "Add to my calendar" download on
+  the page is the substitute for the booking confirmation, and it points at
+  `barna.co.uk/webinar` rather than at the Teams link on purpose, so the
+  diary entry stays correct if the meeting is recreated.
+- **Members must log in to book.** Eventbrite let anyone book with a code.
+  This is the biggest practical risk, since the 90 legacy members have only
+  just been migrated and many have never set a password.
+- **No discovery from Eventbrite's own listings**, and no public "X people
+  going" social proof.
+- Every £5 guest becomes a Memberstack account, so the member count climbs
+  faster still. It was already true that member count ≠ paid count.
+
+The Eventbrite links themselves are still live in 12 places (the footer
+social icon on every page, the members.html CTA band, a commented
+placeholder on index.html). Leave them until the website route is proven.
 
 ## Membership (Memberstack)
 - **Paid-only by design.** Two halves that must stay in sync — if you add
