@@ -291,10 +291,16 @@ that date itself, we built it:
   `'8/9/2026 11:41:51'` as US month/day. Log
   `_member-list/import-log-batch3.csv`, welcome email note
   `_member-list/send-batch3-bcc.txt`. She was sent Version C too.
-  **All 89 have now had the welcome email — do not send it again.**
+- **Mat Simcock added by hand 2 Sep 2026, so 90 are live.** A legacy member
+  missed off the original sheet entirely, added with
+  `import_legacy_members.py --only mat.simcock@gmail.com`, expiry 03/09/2027,
+  log `_member-list/import-log-simcock.csv`. Note he is on the free Manual
+  Access plan and so has not paid through Stripe — correct for a legacy
+  member, but the exception to "the website is the only way in".
+- **All 90 have now had the welcome email — do not send it again.**
   **4 remain held back**, all of them ones that looked already lapsed, listed
   in `_member-list/held-back.txt`. They have no Memberstack account at all.
-  ⚠️ **The consequence is that `scripts/check_member_expiry.py` now has 89
+  ⚠️ **The consequence is that `scripts/check_member_expiry.py` now has 90
   real members to act on.** Its 35 green runs to date prove only that the
   script executed, not that it was pointed at live data. Verify with a
   manual DRY RUN before trusting it, and check `MEMBERSTACK_SECRET_KEY` is
