@@ -44,11 +44,17 @@ Everything else deliberately stays in the same tab, confirmed with Mike:
 `rel="noopener"` matters on its own: without it the opened page can reach
 back into the tab that opened it.
 
-## Navigation (deliberately kept short)
-Home · About · Affiliations & Partners · Education & Clinical Practice ·
-Paediatric Care · Members Area
+## Navigation (kept short, with one deliberate exception)
+Home · About · Conferences · Affiliations & Partners ·
+Education & Clinical Practice · Paediatric Care · Members Area
 
 Notes on why it's structured this way:
+- "Conferences" was added Sep 2026 at Mike's direct request, taking the nav
+  to seven items. It was first built as a sub-page of About; Mike asked for
+  it to be a section in its own right instead. The two "Conference & Study
+  Days" archive PDFs moved off About with it, so they now live in one place
+  only. Everything else below still holds — this is the exception, not a
+  loosening of the rule.
 - "Join" is NOT in the nav — it's a hero button + footer link only.
 - "Events" is NOT a separate page — event/webinar content lives directly
   on the homepage in the "Events & Webinars" section, since that's the
@@ -70,6 +76,21 @@ Notes on why it's structured this way:
 ## Current page status
 - `index.html`, `about.html`, `affiliations.html`, `education-clinical.html`,
   `members.html` — real content, built out.
+- `conferences.html` — built Sep 2026 from the conference material in BARNA's
+  Google Drive (`My Drive/BARNA FILES/`, folders `Barna Conference 2024`,
+  `BARNA conference 2025`, `BARNA CONFERENCE 2026`). Full session tables for
+  the 35th and 36th, the 34th's date/venue/theme, and an accordion covering
+  the Greenwich years, the Covid gap and the 2016 IFNA congress in Glasgow.
+  Eight photos per year in `images/conferences/<year>/`, exported at 1400px
+  with EXIF stripped (so no GPS) and camera rotation baked in — the 2026
+  originals are all sideways without it. Chosen as room-and-atmosphere shots,
+  not close-ups, which is the standing rule for delegate photos here. The
+  2025 set is Dan Smedley's work and is credited on the page.
+  **Speaker slide decks are deliberately NOT published** — permission to put
+  them online was never sought from the speakers. Two of the 2025 decks are
+  837MB and 793MB, so they would have to link out to Drive rather than sit in
+  the repo. The one real gap is a 2024 delegate programme: Drive has only the
+  sponsor prospectus for that year, so 2024 has no session table.
 - `abc-packs.html` + `airway-grid.html` / `breathing-grid.html` /
   `circulation-grid.html` — gated ABC learning-resource pages, built
   Aug 2026 from the old site's Members Only Area. Small files served
