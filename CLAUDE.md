@@ -116,97 +116,83 @@ Notes on why it's structured this way:
   current — no newer version exists despite the old site's "updated
   soon" note.
 
-## Webinars — ⏸ PAUSED 3 Sep 2026. Eventbrite stays for now.
+## Webinars — Teams, one permanent link (live 5 Sep 2026)
 
-**Do not build on this. Do not raise it unless Mike does.** He asked to
-stop and think about it, so Eventbrite and the current arrangement stay
-exactly as they are. `webinar.html` was built and then removed from the
-site the same day, because a public page advertising an invented webinar
-is worse than no page. It is in git history at commit `e2cb79c` and comes
-back with `git checkout e2cb79c -- webinar.html` if he ever picks this up.
+**The audience is not sent a link any more. There is one link, forever, and
+it lives in the members area.** That is the whole design, and it exists
+because people kept losing the link inside an email and asking Mike for it,
+board members and speakers included.
 
-The rest of this section is kept only so the thinking does not have to be
-redone. It records what the problem actually was, which took a couple of
-rounds to get right.
+### The shape of it
+One **all-day recurring Teams series** ("BARNA Webinar", first Saturday,
+running to 31 Dec 2036), created on Mike's NHS account 5 Sep 2026. A Teams
+link is joinable whenever, regardless of what the calendar says, so the
+recurrence is only a device to stop the link expiring and the times on it
+mean nothing. **Nobody is invited to the series**, which is what stops
+anyone ever seeing a date on it and emailing to ask why it says Saturday.
 
-Mike wants Eventbrite gone: one place to promote from, one place to pay,
-and no second system to log into. Two problems had to be solved together,
-and the second one is the reason the design is not simply "a page with a
-Teams link on it".
+Its `href` in `members.html` is the only place the link exists. Changing
+webinar is now: write one email with the date and speaker, and update the
+homepage Events section. No new link, no Eventbrite, no website edit.
 
-**Problem 1 — people cannot find the Teams link.** It only ever existed
-inside one email, so anyone who lost the email asked Mike, including board
-members and speakers. Fixed by giving the link one permanent home at
-`barna.co.uk/webinar`. That address goes on everything and never changes.
-The Teams link lives in exactly one place, `window.WEBINAR.teamsLink` in
-`webinar.html`, so a meeting recreated ten minutes before the start is a
-one-line edit and nobody needs telling.
+⚠️ **Never delete the Teams series.** That kills the link permanently and
+every poster pointing at it goes stale.
 
-**Problem 2 — nobody knows the headcount.** This is what Eventbrite was
-actually being used for. Twice, sessions were organised with one or two
-people booked and no way to know in advance. Booking also creates a bit of
-commitment, which is why members booked free with a promo code rather than
-just being told to turn up.
+### Settings that make it work, and why
+Verified 5 Sep 2026 by joining from a private browser window as an
+anonymous user with no Teams account: straight in, no lobby.
+- Who can bypass the lobby → **Everyone**
+- People dialling in can bypass the lobby → **On**
+- Anonymous users can join → **On**
 
-### How a booking is recorded
-Two routes in, and they are counted in two different places:
+The original failures were almost certainly the meeting being hosted from a
+locked-down NHS tenant, where external people hit a lobby nobody watched.
+Joining *outward* to someone else's meeting is normal for NHS staff; it is
+hosting from inside that tenant that breaks. Mike's own NHS account turned
+out to allow the settings above, so nothing had to be bought.
 
-| Who | Route | Where the count is read |
-|---|---|---|
-| Member | clicks "Yes, save me a place" | custom field `bookedwebinar` in the dashboard member list, filtered to this webinar's `bookingRef` |
-| Non-member | pays £5 | the member list for that webinar's own £5 plan |
+⚠️ **The link depends on Mike's NHS employment.** If he changes trust or
+their IT tightens those settings, it dies. Teams Essentials on a BARNA
+`.onmicrosoft.com` account (~£4/month) is the de-risking move if that ever
+matters. **Do not add `barna.co.uk` to a Microsoft 365 account** — Microsoft
+would want the MX record, and that would break `info@barna.co.uk`.
 
-**Members are deliberately not gated on having booked.** Booking is a
-courtesy that produces the headcount; it is not access control. A member
-who forgets to book still sees the join link, because locking a paid-up
-member out of a webinar they have already paid for through membership
-would be a far worse failure than an inaccurate count.
+### The link is effectively public, and Mike knows
+Static hosting cannot withhold anything: Memberstack hides the block
+visually but the link is in the page source for anyone who looks, and the
+repo is public, and git history is permanent. Mike was told all of this
+before it went in and accepted it (5 Sep 2026): the realistic worst case is
+someone watching a perioperative nursing webinar without paying £5. If it
+is ever abused, create a new series and change the one `href`.
 
-### The per-webinar setup, and the one permanent gate key
-The £5 buys **one named webinar**, Mike's call — not a day pass, because a
-day pass gives no per-event list.
+### Rejected, and why — don't re-propose these
+- **A stream (YouTube Live embedded in the members area).** Technically the
+  neatest: permanent embed, goes live by itself, recording lands in the same
+  place automatically. Rejected 5 Sep 2026 because the audience cannot speak
+  and **the speakers value the engagement**. Do not raise it again unless
+  Mike does.
+- **Per-webinar Memberstack plans and a £5 gate.** Built 3 Sep 2026 as
+  `webinar.html`, then removed the same day. Still in history at `e2cb79c`.
+  It solved the headcount but added monthly dashboard work, which is the
+  opposite of what Mike asked for.
+- **A day pass** rather than one named webinar, rejected because it gives no
+  per-event list.
 
-The gated group key in the HTML is `barna-webinar-guest` and is
-**permanent**. Each webinar gets its own new £5 plan, which is linked to
-that one group in the dashboard while last month's is unlinked. That is
-what keeps the HTML gate constant while the paying audience rotates. It
-also means there is no expiry job and no cleanup: nobody's plan is ever
-removed, they simply stop matching the group.
-⚠️ If the old plan is not unlinked, last month's guests get in free. That
-unlink is the one step that genuinely must not be skipped.
-
-### Never verified — nothing was ever set up
-No Memberstack plan, price or gated group was created, so none of this has
-ever run. The page was placeholders only and was proved to render and wire
-itself up, nothing more. If it is ever revived, confirm on a real account:
-1. a one-time £5 price can be bought by someone who is not a member, and
-   lands them in the `barna-webinar-guest` group;
-2. `$memberstackDom.updateMember({customFields:{bookedwebinar: ...}})`
-   succeeds from the browser for a logged-in member, and the value shows as
-   a column in the dashboard;
-3. the value survives and reads back on a return visit.
-Item 2 is the one most likely to need changing — if the DOM package will
-not write a custom field, the fallback is a `data-ms-form` profile form.
-
-### What was consciously given up with Eventbrite
-Worth remembering rather than rediscovering:
-- **No automatic confirmation or reminder email.** Email Campaigns can
-  filter by plan, so a reminder to that webinar's guests is possible, but it
-  is a send someone has to remember. The "Add to my calendar" download on
-  the page is the substitute for the booking confirmation, and it points at
-  `barna.co.uk/webinar` rather than at the Teams link on purpose, so the
-  diary entry stays correct if the meeting is recreated.
-- **Members must log in to book.** Eventbrite let anyone book with a code.
-  This is the biggest practical risk, since the 90 legacy members have only
-  just been migrated and many have never set a password.
-- **No discovery from Eventbrite's own listings**, and no public "X people
-  going" social proof.
-- Every £5 guest becomes a Memberstack account, so the member count climbs
-  faster still. It was already true that member count ≠ paid count.
-
-Nothing about Eventbrite was changed. Its links are live in 12 places as
-they always were: the footer social icon on every page, the members.html
-CTA band, and a commented placeholder on index.html.
+### Still open
+- **Headcount.** Eventbrite's real value was knowing how many were booked;
+  sessions have been run with one or two people and no warning. Nothing
+  replaces this yet. Teams shows attendance during and after the meeting,
+  which may be enough. Do not build a booking system unless Mike asks.
+- **The £5 for non-members.** Currently nothing collects it. Mike's stated
+  fallback is emailing the link to payers himself, which is a handful of
+  people rather than the whole membership.
+- **Eventbrite is still live in 12 places**, including a "Browse on
+  Eventbrite" band in the members area sitting directly below the new join
+  block. Leave it until Mike has run a webinar through the new route.
+- **Recordings** still go up by hand: Teams records to OneDrive, Mike
+  uploads to YouTube, and it is linked from the members area. Putting them
+  in a YouTube **playlist** and embedding that once would make new
+  recordings appear by themselves, with no HTML edit. Offered, not yet taken up.
 
 ## Membership (Memberstack)
 - **Paid-only by design.** Two halves that must stay in sync — if you add
