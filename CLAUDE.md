@@ -138,12 +138,23 @@ homepage Events section. No new link, no Eventbrite, no website edit.
 ⚠️ **Never delete the Teams series.** That kills the link permanently and
 every poster pointing at it goes stale.
 
-### Settings that make it work, and why
+### Settings that make it work, and the one that cannot be fixed
 Verified 5 Sep 2026 by joining from a private browser window as an
 anonymous user with no Teams account: straight in, no lobby.
 - Who can bypass the lobby → **Everyone**
 - People dialling in can bypass the lobby → **On**
 - Anonymous users can join → **On**
+
+⚠️ **An organiser must open the room.** A guest arriving before anyone has
+started the meeting sees *"Someone will let you in when the meeting starts"*.
+That is not the lobby, it is the meeting not being open yet, and the setting
+that would fix it (**anonymous users can start a meeting**) is a tenant-wide
+Teams admin control that Mike cannot reach on an NHS account. In practice
+this is survivable because the host is there anyway, but it does mean the
+link is not literally "always open", and the members-area copy says so.
+Fixing it properly needs a BARNA-owned Microsoft tenant where Mike is the
+admin. This is the strongest argument for the ~£4-5/month account, stronger
+than the employment-dependency risk below.
 
 The original failures were almost certainly the meeting being hosted from a
 locked-down NHS tenant, where external people hit a lobby nobody watched.
