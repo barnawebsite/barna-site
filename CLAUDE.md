@@ -145,8 +145,11 @@ anonymous user with no Teams account: straight in, no lobby.
 - People dialling in can bypass the lobby → **On**
 - Anonymous users can join → **On**
 
-⚠️ **An organiser must open the room.** A guest arriving before anyone has
-started the meeting sees *"Someone will let you in when the meeting starts"*.
+⚠️ **Mike must open the room, and only he can.** A guest arriving before
+anyone has started the meeting sees *"Someone will let you in when the
+meeting starts"*. Tested 5 Sep 2026: **being signed in does not help** if
+the account is outside the trust's tenant, so the speakers cannot open it
+either. It is the organiser, or someone on the same NHS tenant, or nobody.
 That is not the lobby, it is the meeting not being open yet, and the setting
 that would fix it (**anonymous users can start a meeting**) is a tenant-wide
 Teams admin control that Mike cannot reach on an NHS account. In practice
