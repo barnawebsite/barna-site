@@ -191,6 +191,13 @@ is ever abused, create a new series and change the one `href`.
   opposite of what Mike asked for.
 - **A day pass** rather than one named webinar, rejected because it gives no
   per-event list.
+- **Jitsi Meet (`meet.jit.si`), free.** Tested 5 Sep 2026: *"The conference
+  has not yet started because no moderators have yet arrived. If you'd like
+  to become a moderator please log-in."* Same host-must-start problem as
+  Teams, so it buys nothing. Zoom free is out too (40 minute cap), and
+  Google Meet needs a signed-in host to admit outsiders. **There is no free
+  option that gives an always-open room with no host.** Do not go looking
+  again.
 
 ### Still open
 - **Headcount.** Eventbrite's real value was knowing how many were booked;
