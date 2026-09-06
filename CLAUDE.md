@@ -166,10 +166,34 @@ hosting from inside that tenant that breaks. Mike's own NHS account turned
 out to allow the settings above, so nothing had to be bought.
 
 ⚠️ **The link depends on Mike's NHS employment.** If he changes trust or
-their IT tightens those settings, it dies. Teams Essentials on a BARNA
-`.onmicrosoft.com` account (~£4/month) is the de-risking move if that ever
-matters. **Do not add `barna.co.uk` to a Microsoft 365 account** — Microsoft
-would want the MX record, and that would break `info@barna.co.uk`.
+their IT tightens those settings, it dies.
+
+### ✅ The fix is FREE: BARNA is a registered charity
+**Charity number 1039150**, also a company limited by guarantee (2809708),
+confirmed on the Charity Commission register 6 Sep 2026. That makes BARNA
+eligible for **Microsoft 365 Business Basic as a nonprofit grant — free for
+up to 300 users**, still granted in 2026 (the free *Business Premium* and
+Office 365 E1 grants ended 1 Jul 2025; Basic did not). Validation runs
+through TechSoup and takes roughly 5-10 working days.
+
+That single free licence gives BARNA everything the paid route was going to
+buy, and removes every remaining blocker at once:
+- Mike becomes tenant **admin**, so he can turn on **anonymous users can
+  start a meeting** — the room opens for whoever arrives first, with no host
+- **Record automatically** can be set on the recurring series, so nobody
+  ever presses record. This matters more than it sounds: Mike's stated
+  constraint is that the people running these webinars cannot be relied on
+  to operate a computer, so every step a human must remember will fail
+- recordings land in that account's OneDrive (1 TB)
+- it is the same platform already set up and tested, so nothing is relearned
+
+⚠️⚠️ **DO NOT COMPLETE MICROSOFT'S "set up email" STEP.** Adding
+`barna.co.uk` to a Microsoft tenant and activating Exchange makes Microsoft
+want the apex **MX record**, which would break `info@barna.co.uk` at
+StackMail and undo the whole of `dns-cutover.md`. Domain *verification* by
+TXT record is harmless and fine. Activating mail is not. If in doubt, run
+the whole thing on the `.onmicrosoft.com` address and never add the domain
+at all — Teams works perfectly that way.
 
 ### The link is effectively public, and Mike knows
 Static hosting cannot withhold anything: Memberstack hides the block
@@ -191,6 +215,13 @@ is ever abused, create a new series and change the one `href`.
   opposite of what Mike asked for.
 - **A day pass** rather than one named webinar, rejected because it gives no
   per-event list.
+- **Google Meet, including via Google for Nonprofits.** Checked 6 Sep 2026
+  and it is *worse* than Teams for this: anonymous participants must be
+  admitted by someone from the host's organisation, and **if no host is
+  present nobody even sees the request**. So an always-open room is not
+  possible at all, not just awkward. On top of that the free nonprofit tier
+  has **no meeting recording** (that needs Business Standard). Microsoft's
+  nonprofit grant beats it outright. Do not revisit.
 - **Jitsi Meet (`meet.jit.si`), free.** Tested 5 Sep 2026: *"The conference
   has not yet started because no moderators have yet arrived. If you'd like
   to become a moderator please log-in."* Same host-must-start problem as
