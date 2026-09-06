@@ -135,9 +135,13 @@ mean nothing. **Nobody is invited to the series**, which is what stops
 anyone ever seeing a date on it and emailing to ask why it says Saturday.
 
 Its `href` in `members.html` is the only place the link exists. The members
-area also shows the address as **copyable text with a Copy link button**, so
-board members can send it to an external speaker or guest without asking
-Mike. That text is written by a small script from the button's own `href`, so
+area also shows the address as **copyable text with a Copy link button**,
+worded neutrally as another way to join ("Or copy and paste this link
+straight into your browser"). It deliberately says **nothing about sending it
+to speakers or guests** — Mike's call, 6 Sep 2026: he does not want the page
+inviting people to forward it, and anyone who asks simply gets told the link
+is in the members area. Do not add sharing wording back.
+That text is written by a small script from the button's own `href`, so
 the link still appears exactly once in the file — verified with a count.
 **Never paste the address into the visible element as well**, or the two
 will drift and half the site will point at a dead meeting. Changing
