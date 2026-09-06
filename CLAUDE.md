@@ -147,11 +147,35 @@ anonymous user with no Teams account: straight in, no lobby.
 - People dialling in can bypass the lobby → **On**
 - Anonymous users can join → **On**
 
-⚠️ **Superseded 6 Sep 2026 — kept because it explains the whole design.**
-On the BARNA tenant Mike is the admin, so **anonymous users can start a
-meeting** is switched on and this limitation should be gone. It has NOT been
-retested yet; until it is, the members-area copy stays cautious. What
-follows describes the NHS-account behaviour:
+### ✅ SOLVED 6 Sep 2026 — the room is genuinely always open
+On BARNA's own tenant Mike is the admin, so **anonymous users can start a
+meeting** and **record automatically** are both switched on. Verified from a
+private browser window: an anonymous joiner with no Teams account got into a
+**completely empty room**, and **recording started by itself**. So nobody
+has to open the room and nobody has to press record, which was the whole
+requirement — Mike is not attending these webinars and the people running
+them cannot be relied on to operate a computer.
+
+Consequence of an always-open room: **any stray join creates a recording.**
+Someone wandering in for two minutes produces a file. Recording starts when
+the first person joins and stops when the last one leaves, so a webinar
+where the room briefly empties will also split into two files. Junk
+recordings are small and worth living with; the alternative is a human
+remembering to press record, which is the failure mode this was built to
+avoid.
+
+⚠️ **Teams recordings auto-expire, commonly after 60 days.** Helpful for the
+junk, disastrous for the real ones. Either turn expiry off in the recording
+section of the meeting policy, or move each webinar to YouTube promptly —
+which happens anyway to get it into the members area.
+
+The `webinars@barna.onmicrosoft.com` account was created as a fallback for
+someone to press record. **It turned out not to be needed in the room** and
+nobody needs to sign in to anything. It costs nothing (second free licence)
+so it has been left in place, but do not build any process around it.
+
+What follows describes the OLD NHS-account behaviour, kept because it
+explains why the design is shaped this way:
 
 ⚠️ **Mike must open the room, and only he can.** A guest arriving before
 anyone has started the meeting sees *"Someone will let you in when the
