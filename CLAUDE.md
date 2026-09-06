@@ -124,8 +124,10 @@ because people kept losing the link inside an email and asking Mike for it,
 board members and speakers included.
 
 ### The shape of it
-One **all-day recurring Teams series** ("BARNA Webinar", first Saturday,
-running to 31 Dec 2036), created on Mike's NHS account 5 Sep 2026. A Teams
+One **all-day recurring Teams series** ("BARNA Webinar", running to
+31 Dec 2036). First built on Mike's NHS account 5 Sep 2026; **moved to
+BARNA's own tenant 6 Sep 2026** once the nonprofit grant came through, and
+the live link is now the one on `barna.onmicrosoft.com`. A Teams
 link is joinable whenever, regardless of what the calendar says, so the
 recurrence is only a device to stop the link expiring and the times on it
 mean nothing. **Nobody is invited to the series**, which is what stops
@@ -144,6 +146,12 @@ anonymous user with no Teams account: straight in, no lobby.
 - Who can bypass the lobby → **Everyone**
 - People dialling in can bypass the lobby → **On**
 - Anonymous users can join → **On**
+
+⚠️ **Superseded 6 Sep 2026 — kept because it explains the whole design.**
+On the BARNA tenant Mike is the admin, so **anonymous users can start a
+meeting** is switched on and this limitation should be gone. It has NOT been
+retested yet; until it is, the members-area copy stays cautious. What
+follows describes the NHS-account behaviour:
 
 ⚠️ **Mike must open the room, and only he can.** A guest arriving before
 anyone has started the meeting sees *"Someone will let you in when the
