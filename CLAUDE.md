@@ -173,8 +173,11 @@ their IT tightens those settings, it dies.
 confirmed on the Charity Commission register 6 Sep 2026. That makes BARNA
 eligible for **Microsoft 365 Business Basic as a nonprofit grant — free for
 up to 300 users**, still granted in 2026 (the free *Business Premium* and
-Office 365 E1 grants ended 1 Jul 2025; Basic did not). Validation runs
-through TechSoup and takes roughly 5-10 working days.
+Office 365 E1 grants ended 1 Jul 2025; Basic did not). Validation runs through **Goodstack** (the signup form names them; not
+TechSoup, which is what the third-party write-ups still say) and takes
+roughly 5-10 working days. Applied 6 Sep 2026 using `info@barna.co.uk` as
+the organisation email — a personal address would have triggered extra
+verification.
 
 That single free licence gives BARNA everything the paid route was going to
 buy, and removes every remaining blocker at once:
