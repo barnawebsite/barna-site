@@ -65,13 +65,13 @@ Notes on why it's structured this way:
   for this specifically, it's a real focus area, not a subsection.
 - ABC Packs pages are NOT in the nav — reached via the Members Area
   "Member Resources" cards only (they're gated member content).
-- Social links (Instagram, Facebook, LinkedIn, Eventbrite) live in the
-  shared footer as `.footer-social`, added Aug 2026. Icons are inline
-  SVG — no image files, they inherit colour via `currentColor`, so a
-  brand-colour change in `css/style.css` carries through. The Eventbrite
-  one is a generic ticket glyph, not Eventbrite's real logo mark.
-  Tracking parameters (`igsh`, `mibextid`, `viewAsMember`) were stripped
-  from the URLs Mike supplied — don't paste them back in.
+- Social links (Instagram, Facebook, LinkedIn) live in the shared footer as
+  `.footer-social`, added Aug 2026. Icons are inline SVG — no image files,
+  they inherit colour via `currentColor`, so a brand-colour change in
+  `css/style.css` carries through. Tracking parameters (`igsh`, `mibextid`,
+  `viewAsMember`) were stripped from the URLs Mike supplied — don't paste
+  them back in. A fourth Eventbrite icon was removed 6 Sep 2026; see
+  `eventbrite-archive.md`.
 
 ## Current page status
 - `index.html`, `about.html`, `affiliations.html`, `education-clinical.html`,
@@ -103,8 +103,9 @@ Notes on why it's structured this way:
   anchor) plus placeholder public copy. General specialty content is
   still the biggest remaining gap; blocked on Mike sourcing it — don't
   build until he provides it.
-- `members.html` — fully built: Member Resources cards (ABC Packs,
-  Paediatric workbook), Eventbrite promo, webinar archive with
+- `members.html` — fully built: the permanent webinar join block (section 0,
+  the one thing members are pointed at), Member Resources cards (ABC Packs,
+  Paediatric workbook), webinar archive with
   recordings/files linked, legacy "Earlier resources" list. The
   `<!-- EDIT: add recording/slides link -->` comments on recent webinar
   cards are intentional slots for future recordings, not gaps.
@@ -273,9 +274,15 @@ is ever abused, create a new series and change the one `href`.
 - **The £5 for non-members.** Currently nothing collects it. Mike's stated
   fallback is emailing the link to payers himself, which is a handful of
   people rather than the whole membership.
-- **Eventbrite is still live in 12 places**, including a "Browse on
-  Eventbrite" band in the members area sitting directly below the new join
-  block. Leave it until Mike has run a webinar through the new route.
+- ~~Eventbrite still live in 12 places~~ **REMOVED 6 Sep 2026**, on Mike's
+  instruction, before the first webinar rather than after: the footer icon on
+  all 12 pages, the members-area CTA band, the homepage event template, and
+  two stale "with your booking code" benefit lines that only made sense while
+  Eventbrite existed. Everything needed to put it back, including the
+  `BARNAVIP` code and the exact markup, is in **`eventbrite-archive.md`** at
+  the repo root. The Eventbrite account itself was not closed, only unlinked.
+  `.promo-code` / `.promo-code-line` are left in `css/style.css` unused, so a
+  restore needs no CSS work.
 - **Recordings** still go up by hand: Teams records to OneDrive, Mike
   uploads to YouTube, and it is linked from the members area. Putting them
   in a YouTube **playlist** and embedding that once would make new
