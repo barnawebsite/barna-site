@@ -113,8 +113,19 @@
          itself, and you are set for every webinar we run.</p>
 
       <p style="margin-top:20px;">
-        <a href="https://teams.microsoft.com/meet/323579395871903?p=biMyuzc4CbMjMs1QCk" target="_blank" rel="noopener" class="btn btn-coral">Join the webinar</a>
+        <a id="webinar-join" href="https://teams.microsoft.com/meet/323579395871903?p=biMyuzc4CbMjMs1QCk" target="_blank" rel="noopener" class="btn btn-coral">Join the webinar</a>
       </p>
+
+      <!-- The visible address below is filled in from the button's own href by the
+           script at the bottom of this section, so THE LINK ONLY EXISTS ONCE on this
+           page. Change the href above and this updates itself. Do not paste the
+           address in here as well, or the two will drift apart. -->
+      <p style="margin:18px 0 6px; color:#45606b; font-size:14px;">Or copy the link, to send
+         to a speaker or a guest:</p>
+      <div style="display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:4px;">
+        <code id="webinar-url" style="flex:1 1 320px; min-width:0; word-break:break-all; background:#f1f6f7; border:1px solid #d7e3e5; border-radius:6px; padding:10px 12px; font-size:13px; color:var(--navy);"></code>
+        <button type="button" id="copy-webinar-link" class="btn btn-teal" style="flex:0 0 auto;">Copy link</button>
+      </div>
 
       <h3>How it works</h3>
       <p>The link never changes and never expires, so you can save it once and use it
@@ -137,6 +148,49 @@
          are further down this page.</p>
     </div>
   </section>
+
+  <script>
+  /* Shows the joining address as text next to the button, and copies it in one
+     click. Reads the address off the button itself, so there is only ever one
+     copy of the link on this page to keep up to date. */
+  (function () {
+    var link = document.getElementById('webinar-join');
+    var out  = document.getElementById('webinar-url');
+    var btn  = document.getElementById('copy-webinar-link');
+    if (!link || !out) { return; }
+    out.textContent = link.href;
+    if (!btn) { return; }
+
+    function flash(msg, ms) {
+      btn.textContent = msg;
+      setTimeout(function () { btn.textContent = 'Copy link'; }, ms);
+    }
+    /* Fallback for browsers that block the clipboard API: select the text so the
+       reader only has to press the copy shortcut. */
+    function selectIt() {
+      try {
+        var range = document.createRange();
+        range.selectNodeContents(out);
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        flash('Now press copy', 4000);
+      } catch (e) {
+        flash('Select it and copy', 4000);
+      }
+    }
+
+    btn.addEventListener('click', function () {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(link.href).then(function () {
+          flash('Copied', 2000);
+        }).catch(selectIt);
+      } else {
+        selectIt();
+      }
+    });
+  })();
+  </script>
 
   <!-- BARNA's own upcoming webinars live only on the homepage, so there is one place
        to update when a new event is scheduled. The permanent Teams link in section 0

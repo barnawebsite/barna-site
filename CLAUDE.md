@@ -134,7 +134,13 @@ recurrence is only a device to stop the link expiring and the times on it
 mean nothing. **Nobody is invited to the series**, which is what stops
 anyone ever seeing a date on it and emailing to ask why it says Saturday.
 
-Its `href` in `members.html` is the only place the link exists. Changing
+Its `href` in `members.html` is the only place the link exists. The members
+area also shows the address as **copyable text with a Copy link button**, so
+board members can send it to an external speaker or guest without asking
+Mike. That text is written by a small script from the button's own `href`, so
+the link still appears exactly once in the file — verified with a count.
+**Never paste the address into the visible element as well**, or the two
+will drift and half the site will point at a dead meeting. Changing
 webinar is now: write one email with the date and speaker, and update the
 homepage Events section. No new link, no Eventbrite, no website edit.
 
