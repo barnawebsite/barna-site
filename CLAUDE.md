@@ -276,6 +276,46 @@ is ever abused, create a new series and change the one `href`.
   option that gives an always-open room with no host.** Do not go looking
   again.
 
+### Board decision, 9 Sep 2026: staying off Eventbrite
+Katie Bagstaff and Alison Popa both agreed in the chairs' WhatsApp group.
+Katie's line settles it: not worth the stress for the few pounds made.
+**Two volunteers have come forward for social media**, which is where the
+promotion effort now goes instead, since without Eventbrite listings the
+webinars have to be pushed harder on socials and email.
+
+⚠️ **Volunteers must NOT be given `admin@barna.onmicrosoft.com`.** Asked
+9 Sep 2026 and advised against: it is the tenant global admin, they do not
+need it (there are no Teams links to create any more — that is the point),
+and mail from an `onmicrosoft.com` address has poor deliverability, so a
+member mailout from it would land in spam and undo the DKIM/SPF/DMARC work.
+The recommendation was a **new 20i mailbox on the real domain**
+(`comms@` or `social@barna.co.uk`), shared between the two of them the way
+`info@` already is: right sender domain, existing DKIM, and no access to
+`info@`, the Drive, or member files. Give a volunteer their own Microsoft
+*user* account if they ever need Teams. Never the admin one.
+Member lists handed to volunteers should be **name and email only** — the
+full export carries home addresses and places of work. Memberstack Email
+Campaigns would avoid copying the list out at all, but that is still waiting
+on the `news.barna.co.uk` sender records.
+
+### Zoom — checked 9 Sep 2026, not taken
+Alison raised it: US webinars she attends offer member and non-member
+registration through Zoom. Real, and BARNA would qualify for **50% off via
+Zoom Cares**, validated by **Goodstack** (the same validator used for the
+Microsoft grant, so it would be quick). TechSoup stopped offering it May 2025.
+**Annual billing only**, so it is a year's commitment rather than a monthly
+cost that can be stopped.
+
+Not taken, and the reasoning is worth keeping: Zoom Pro at 50% is ~£70/year,
+and the **Webinar add-on** — the part that actually does paid registration —
+is several hundred a year even discounted, against ticket income Katie
+described as "the odd £10". It would also reintroduce per-webinar setup and
+somebody emailing links out, which is the exact work that broke before;
+Alison's own description included "someone is in charge of sending out the
+link and managing it". What it would genuinely buy back is the headcount.
+**Revisit only if the missing headcount actually hurts after a few webinars**,
+and decide on evidence rather than guessing.
+
 ### Still open
 - **Headcount.** Eventbrite's real value was knowing how many were booked;
   sessions have been run with one or two people and no warning. Nothing
