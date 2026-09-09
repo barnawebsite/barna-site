@@ -288,15 +288,29 @@ webinars have to be pushed harder on socials and email.
 need it (there are no Teams links to create any more — that is the point),
 and mail from an `onmicrosoft.com` address has poor deliverability, so a
 member mailout from it would land in spam and undo the DKIM/SPF/DMARC work.
-The recommendation was a **new 20i mailbox on the real domain**
-(`comms@` or `social@barna.co.uk`), shared between the two of them the way
-`info@` already is: right sender domain, existing DKIM, and no access to
-`info@`, the Drive, or member files. Give a volunteer their own Microsoft
-*user* account if they ever need Teams. Never the admin one.
-Member lists handed to volunteers should be **name and email only** — the
-full export carries home addresses and places of work. Memberstack Email
+A new 20i mailbox (`comms@barna.co.uk`) was suggested and **rejected by
+Mike**: adding a non-Gmail account to a volunteer's phone is too much to ask
+of them, and ease of use is the whole point. Gmail delegation was also
+offered (mail-only access, no password shared, no Drive) but it is web-only
+on personal Gmail, so the same phone objection applies.
+
+**What is actually happening:** the two volunteers get the existing
+`connectwithbarna@gmail.com` Google account, with the BARNA members file
+deleted from its Drive first. Mike's call, 9 Sep 2026, and reasonable — both
+volunteers are BARNA members themselves, so the member list is the only item
+that genuinely matters. Whoever does this should empty the Drive Trash
+afterwards (deleted files stay recoverable for 30 days) and check whether the
+BARNA YouTube channel sits on that same Google account, since that would give
+them edit rights over the webinar recordings.
+
+Member lists handed to volunteers should still be **name and email only** —
+the full export carries home addresses and places of work. Memberstack Email
 Campaigns would avoid copying the list out at all, but that is still waiting
 on the `news.barna.co.uk` sender records.
+
+The one part of the original advice that stands: **never share
+`admin@barna.onmicrosoft.com`.** Give a volunteer their own Microsoft *user*
+account if they ever need Teams.
 
 ### Zoom — checked 9 Sep 2026, not taken
 Alison raised it: US webinars she attends offer member and non-member
