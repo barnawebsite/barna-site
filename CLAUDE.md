@@ -593,11 +593,12 @@ that date itself, we built it:
   by hand. That was a **one-off catch-up, not an ongoing sync** — see the note
   above about why the sheet is no longer a source of truth. The script lived in
   a scratch directory and was deliberately not committed.
-  ⚠️ It matters that the backfill sent each member's **whole** customFields
-  object back, not just the two new keys: it was not established whether
-  Memberstack's PATCH merges or replaces, and a replace would have wiped
-  `accessexpiresat` for all 87 and left nobody's access ever expiring. It
-  re-read each record afterwards and would have stopped on the first lost date.
+  ✅ **PATCH merges custom fields, it does not replace them** — tested
+  deliberately on a live record 5 Oct 2026 by sending only three of a member's
+  five fields and reading back: the other two survived untouched. So
+  `import_legacy_members.py`, which sends only first name, last name and
+  expiry, is safe to run on a member who has an address, and the backfill's
+  caution of sending the whole object back was unnecessary rather than wrong.
 - `scripts/export_members_xlsx.py` writes the reference spreadsheet Mike
   shares with the membership secretary, reading the **live** member list
   rather than the import CSV, so it cannot drift from what the site
