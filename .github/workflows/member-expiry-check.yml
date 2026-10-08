@@ -22,3 +22,19 @@ jobs:
           MANUAL_ACCESS_PLAN_ID: ${{ vars.MANUAL_ACCESS_PLAN_ID }}
           EXPIRY_CHECK_LIVE_MODE: ${{ vars.EXPIRY_CHECK_LIVE_MODE }}
         run: python scripts/check_member_expiry.py
+
+      # Runs after the expiry check, so anyone whose access was removed this
+      # morning moves to BARNA EX MEMBERS the same day. Skipped until the
+      # CONTACTS_SYNC_URL secret exists; dry run until CONTACTS_SYNC_LIVE_MODE
+      # is set to true. See scripts/sync_gmail_contacts.py.
+      - name: Sync Gmail contacts
+        env:
+          MEMBERSTACK_SECRET_KEY: ${{ secrets.MEMBERSTACK_SECRET_KEY }}
+          CONTACTS_SYNC_URL: ${{ secrets.CONTACTS_SYNC_URL }}
+          CONTACTS_SYNC_LIVE_MODE: ${{ vars.CONTACTS_SYNC_LIVE_MODE }}
+        run: |
+          if [ -z "$CONTACTS_SYNC_URL" ]; then
+            echo "CONTACTS_SYNC_URL is not set, so the Gmail contacts sync is skipped."
+            exit 0
+          fi
+          python scripts/sync_gmail_contacts.py
