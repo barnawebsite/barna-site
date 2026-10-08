@@ -218,6 +218,20 @@ section { padding: 56px 0; }
   border-radius: 8px;
   padding: 22px;
 }
+/* Latest guidance: three per row, with a short last row centred rather
+   than left hanging (5 cards = 3 + 2). Steps down to 2, then 1. */
+.resource-grid.guidance-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.guidance-grid .resource-card { flex: 0 1 calc((100% - 40px) / 3); box-sizing: border-box; }
+@media (max-width: 900px) {
+  .guidance-grid .resource-card { flex-basis: calc((100% - 20px) / 2); }
+}
+@media (max-width: 560px) {
+  .guidance-grid .resource-card { flex-basis: 100%; }
+}
 .resource-card h4 { margin: 0 0 8px; }
 .resource-card p { color: #45606b; font-size: 14px; margin: 0 0 16px; }
 
