@@ -312,6 +312,17 @@ The one part of the original advice that stands: **never share
 `admin@barna.onmicrosoft.com`.** Give a volunteer their own Microsoft *user*
 account if they ever need Teams.
 
+### Gmail contacts: kept by hand (decided 9 Oct 2026)
+The BARNA Gmail account (barna.socialnetworks@gmail.com) has contact labels
+for current members, board members and ex members. Mike keeps them up to date
+by hand from a CSV export, which takes a few minutes and only changes when
+someone joins or lapses. A daily automatic sync (GitHub reads Memberstack,
+then POSTs it to an Apps Script web app in the Gmail account) was built
+8 Oct 2026 and removed the next day without ever being switched on, at Mike's
+call. It is in git history at `949f9d7` if it is ever wanted. To refresh the list,
+run `scripts/export_members_xlsx.py` and build a Google Contacts CSV
+(First Name, Last Name, E-mail 1 - Value, Labels) from its sections 1 and 2.
+
 ### Zoom — checked 9 Sep 2026, not taken
 Alison raised it: US webinars she attends offer member and non-member
 registration through Zoom. Real, and BARNA would qualify for **50% off via
