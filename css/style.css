@@ -278,6 +278,16 @@ section { padding: 56px 0; }
   font-size: 13px;
   margin-top: 2px;
 }
+/* Short silent clips shown inline under a recording (e.g. animations from a talk) */
+.webinar-videos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+.webinar-videos figure { margin: 0; }
+.webinar-videos video { width: 100%; height: auto; border-radius: 6px; display: block; background: var(--navy); }
+.webinar-videos figcaption { color: #45606b; font-size: 13px; margin-top: 4px; }
 
 /* ---------- Past webinar archive (collapsed by default to keep the page short) ---------- */
 .webinar-archive {

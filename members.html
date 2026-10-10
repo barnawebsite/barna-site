@@ -201,31 +201,9 @@
 
   <!-- BARNA's own upcoming webinars live only on the homepage, so there is one place
        to update when a new event is scheduled. The permanent Teams link in section 0
-       above is the same for every webinar and never needs touching.
-
-       The block below is the exception: partner webinars carried here as well. This ICPAN
-       one is ALSO on the homepage — ICPAN asked for it to be shared as widely as possible,
-       so it is public there rather than members-only. Delete BOTH copies once the date has
-       passed (and add it to Past Webinars further down if it's worth keeping a record of). -->
-
-  <!-- ============ 1. UPCOMING PARTNER WEBINAR (members only) ============ -->
-  <section class="notices">
-    <div class="wrap">
-      <h2 class="section-title" style="margin-bottom:4px;">Upcoming Partner Webinar</h2>
-      <p style="color:#45606b; font-size:14px; margin:0 0 24px;">From ICPAN, the International Collaboration of PeriAnaesthesia Nurses &mdash; one of the bodies BARNA helped found, and to which BARNA is the official UK representative.</p>
-
-      <div class="notice-card">
-        <div>
-          <div class="label">ICPAN WEBINAR</div>
-          <h3>mtND4 11232 Mutation: What Do We Know So Far? The Current Situation in Spain</h3>
-          <p>Saturday 10 October 2026 &middot; two sessions: 12:00 noon UK time in English, 4:00pm UK time in Spanish</p>
-          <p style="margin-top:10px;">Elena M&eacute;ndez Mart&iacute;nez, MD &mdash; Consultant Anaesthetist and Intensivist, University Hospital Central of Asturias, and lead of the mtND4 Working Group.</p>
-          <p style="margin-top:10px;">Following reports in summer 2025 of serious adverse events in patients of Venezuelan ancestry given general anaesthesia with halogenated agents, the Spanish Society of Anaesthesiology and Resuscitation set up a working group on the mutation. This session covers what the evidence shows so far and how the safety recommendations are developing.</p>
-        </div>
-        <a href="https://www.icpan.org/webinar---10-oct-2026.html" target="_blank" rel="noopener" class="btn btn-teal">Register on ICPAN</a>
-      </div>
-    </div>
-  </section>
+       above is the same for every webinar and never needs touching. Partner webinars
+       (ICPAN etc.) can be carried here as a "1. Upcoming Partner Webinar" section when
+       one comes up; delete it once the date has passed. -->
 
   <!-- ============ 1b. PARTNER CONFERENCE DISCOUNT (members only) ============
        Promo code for the BADS conference, shared at the request of Becka Miller, Healthcare
@@ -303,6 +281,26 @@
       <h2>Webinar Recordings &amp; Resources</h2>
       <p>Recordings and materials from earlier BARNA webinars, free to watch and download as a member.</p>
       <ul class="recording-list">
+        <li id="mtnd4">mtND4 11232 Mutation: What Do We Know So Far? The Current Situation in Spain
+          <span class="recording-speaker">Elena M&eacute;ndez Mart&iacute;nez, mtND4 Working Group, SEDAR &middot; ICPAN webinar, 10 October 2026</span>
+          <div class="webinar-links">
+            <a href="assets/documents/webinars/icpan_mtnd4_elena_mendez_slides_oct_2026.pdf" target="_blank" rel="noopener">Presentation Slides</a>
+            <a href="https://doi.org/10.1016/j.redare.2026.502167" target="_blank" rel="noopener">SEDAR Recommendations (REDAR, 2026)</a>
+            <a href="https://doi.org/10.1097/ALN.0000000000006289" target="_blank" rel="noopener">Rapid Test Paper (Anesthesiology, 2026)</a>
+          </div>
+          <!-- The two clips were sent with the slides; they are the animated versions of
+               slides 10 and 11 (credited there to @DESIMIPEDIATRA). -->
+          <div class="webinar-videos">
+            <figure>
+              <video src="assets/documents/webinars/mtnd4_animation_healthy.mp4" controls muted loop playsinline preload="metadata"></video>
+              <figcaption>A healthy mitochondrion: complexes I to V turning fuel into ATP.</figcaption>
+            </figure>
+            <figure>
+              <video src="assets/documents/webinars/mtnd4_animation_anaesthetic.mp4" controls muted loop playsinline preload="metadata"></video>
+              <figcaption>With the mtND4 variant and a halogenated anaesthetic: complex I fails and ATP production stops.</figcaption>
+            </figure>
+          </div>
+        </li>
         <li>Laryngospasm
           <div class="webinar-links"><a href="https://www.youtube.com/embed/NytBTo-GnLU" target="_blank" rel="noopener">Watch on YouTube</a></div>
         </li>
@@ -352,6 +350,19 @@
       <h2>Past Webinars</h2>
       <p>A record of recent sessions &mdash; click any title for the detail. Recordings are added here as they become available.</p>
       <div class="webinar-archive">
+
+        <details>
+          <summary>
+            <span class="webinar-date">Saturday 10 October 2026</span>
+            ICPAN: mtND4 11232 Mutation: What Do We Know So Far? The Current Situation in Spain
+            <span class="archive-tag">Slides</span>
+          </summary>
+          <div class="archive-body">
+            <p class="webinar-speaker">Elena M&eacute;ndez Mart&iacute;nez, MD, Consultant Anaesthetist and Intensivist, University Hospital Central of Asturias, and lead of the mtND4 Working Group</p>
+            <p>A partner webinar hosted by ICPAN. Following reports of serious neurological events in patients of Venezuelan maternal ancestry given general anaesthesia with halogenated agents, the Spanish Society of Anaesthesiology set up a working group on the mtND4 m.11232T&gt;C variant. The session covered what the evidence shows so far and the current SEDAR recommendations. Slides and animations are under <a href="#mtnd4" style="color:var(--teal);">Webinar Recordings &amp; Resources</a> above.</p>
+            <!-- EDIT: add recording link if ICPAN publishes one -->
+          </div>
+        </details>
 
         <details>
           <summary>
