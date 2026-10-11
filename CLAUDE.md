@@ -816,9 +816,14 @@ or re-enable it from the Actions tab when warned.
   `CNAME` file at the repo root holds `barna.co.uk`; deleting it drops the
   domain, so leave it there.
 - The old `barnawebsite.github.io/barna-site/` address still 301s to
-  `barna.co.uk`, but the **bare** `barnawebsite.github.io` host serves
-  nothing. Never quote either as the live address — that stale host is what
-  broke the Memberstack redirects and the transactional emails, twice.
+  `barna.co.uk`. The **bare** `barnawebsite.github.io` host is served by a
+  second repo, `barnawebsite/barnawebsite.github.io` (local copy on the
+  Desktop): a "your membership has moved" page that catches the dead links
+  from the early Memberstack emails and sends people to log in and reset
+  their password. **Keep that repo — it is not a leftover.** Mike asked on
+  11 Oct 2026 whether one of the two repos could go: neither can. Never quote
+  either github.io address as the live site — that stale host is what broke
+  the Memberstack redirects and the transactional emails, twice.
 - `git push origin main` is the whole deploy. GitHub's "pages build and
   deployment" workflow publishes in ~1 minute. No dashboards, no buttons,
   no credits — the free tier allows ~10 builds/hour, so push freely.
