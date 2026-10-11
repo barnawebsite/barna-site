@@ -613,8 +613,9 @@ that date itself, we built it:
 - `scripts/export_members_xlsx.py` writes the reference spreadsheet Mike
   shares with the membership secretary, reading the **live** member list
   rather than the import CSV, so it cannot drift from what the site
-  enforces. Read-only against Memberstack. Board members first, then
-  everyone else soonest-expiry-first (the dashboard cannot sort that column
+  enforces. Read-only against Memberstack. Everyone with a date
+  first, latest at the top and soonest at the bottom, then the board directly
+  below them (Mike's order, 11 Oct 2026; the dashboard cannot sort that column
   usefully, since `accessexpiresat` is `DD/MM/YYYY` text and sorts by day of
   month), then the held-back people read out of the import CSV because they
   have no Memberstack record. Anything whose date will not parse gets its own

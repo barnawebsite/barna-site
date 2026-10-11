@@ -6,14 +6,15 @@ the website actually enforces, so this reads the live member list rather than
 the import CSV. Read-only against Memberstack: it never creates, updates or
 removes anything.
 
-Three sections, in the order that answers the questions people actually ask:
-  1. Board members, open ended access ("never" in accessexpiresat)
-  2. Everyone else, soonest expiry first
+Sections, in the order Mike asked for (11 Oct 2026):
+  1. Everyone with an expiry date, latest first, so the soonest to expire sit
+     at the bottom, right above the board
+  2. Board members, open ended access ("never" in accessexpiresat)
   3. Anyone still held back, read from the import CSV, because by definition
      they have no Memberstack record to read
 
 Memberstack stores accessexpiresat as DD/MM/YYYY text, so its own dashboard
-sorts that column by day of month. Section 2 is the fix for that.
+sorts that column by day of month. Section 1 is the fix for that.
 
 The output filename is deliberately fixed and carries no date: it is shared
 from iCloud, and a new filename each time would break the share and leave
@@ -209,18 +210,18 @@ def build(rows_board, rows_dated, rows_held, unparsed, out_path, today):
             state["row"] += 1
         state["row"] += 2
 
-    section("1. Board members, open ended access",
-            f"{len(rows_board)} people. No expiry date, they keep access "
-            f"until someone removes them by hand.", NAVY)
-    write(rows_board)
-
-    section("2. Members with an expiry date, soonest first",
+    section("1. Members with an expiry date, soonest at the bottom",
             f"{len(rows_dated)} people. Access ends on the date shown unless "
             f"they renew. Anyone who joined on the website renews by card "
             f"automatically and is marked as such. Address and place of work "
             f"are collected from new members only, so they are blank for "
             f"anyone carried over from the old list.", TEAL)
     write(rows_dated)
+
+    section("2. Board members, open ended access",
+            f"{len(rows_board)} people. No expiry date, they keep access "
+            f"until someone removes them by hand.", NAVY)
+    write(rows_board)
 
 
     if rows_held:
@@ -326,7 +327,9 @@ def main():
                       fields.get(FIELD_ADDRESS) or "",
                       f"Joined on the website {joined.strftime('%d/%m/%Y')}, "
                       f"renews by card automatically"))
-    dated.sort(key=lambda r: (parse_uk_date(r[3]), r[1].lower()))
+    # Latest first, so the ones expiring soonest end up at the bottom of the
+    # list, directly above the board. Same day: alphabetical by surname.
+    dated.sort(key=lambda r: (-parse_uk_date(r[3]).toordinal(), r[1].lower()))
 
     today = datetime.date.today()
     build(board, dated, held, unparsed, args.out, today)
